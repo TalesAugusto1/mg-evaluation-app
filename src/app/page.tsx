@@ -1,11 +1,11 @@
 "use client";
 
 import React from 'react';
-import { useAuth } from '../context/authContext';
+import { useAuth } from '@/context/authContext';
 import Link from 'next/link';
 
 const Home = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <div>
@@ -21,7 +21,7 @@ const Home = () => {
         </div>
       ) : (
         <div>
-          <p>Bem-vindo à página inicial!</p>
+          <p>Bem-vindo, {user?.name}!</p>
           <button onClick={logout}>Logout</button>
         </div>
       )}

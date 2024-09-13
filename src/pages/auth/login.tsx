@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/authContext';
+import Link from 'next/link';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,20 +13,24 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const response = await fetch('http://localhost:3001/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      login(data.token);
-      router.push('/');
-    } else {
-      console.error('Login failed');
+      if (response.ok) {
+        const data = await response.json();
+        login(data.token, data.name);
+        router.push('/');
+      } else {
+        console.error('Login failed');
+      }
+    } catch (error) {
+      console.error('Failed to fetch:', error);
     }
   };
 
@@ -47,6 +52,7 @@ const Login = () => {
         />
         <button type="submit">Entrar</button>
       </form>
+      <p>Não tem uma conta? <Link href="/auth/sign-up">Cadastre-se</Link></p>
     </div>
   );
 };

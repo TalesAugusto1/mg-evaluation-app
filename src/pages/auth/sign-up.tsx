@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const SignUp = () => {
   const [name, setName] = useState('');
@@ -11,18 +12,22 @@ const SignUp = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch('/api/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
+    try {
+      const response = await fetch('http://localhost:3001/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    if (response.ok) {
-      router.push('/');
-    } else {
-      console.error('Registration failed');
+      if (response.ok) {
+        router.push('/auth/login'); // Redirecionar para a página de login após o cadastro
+      } else {
+        console.error('Registration failed');
+      }
+    } catch (error) {
+      console.error('Failed to fetch:', error);
     }
   };
 
@@ -50,6 +55,7 @@ const SignUp = () => {
         />
         <button type="submit">Cadastrar</button>
       </form>
+      <p>Já tem uma conta? <Link href="/auth/login">Entrar</Link></p>
     </div>
   );
 };

@@ -1,9 +1,11 @@
 import express, { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 interface User {
   name: string;
@@ -27,7 +29,7 @@ app.post("/api/login", async (req: Request, res: Response) => {
     const token = jwt.sign({ email: user.email }, "secreta", {
       expiresIn: "1h",
     });
-    res.json({ token });
+    res.json({ token, name: user.name });
   } else {
     res.status(401).send("Credenciais inválidas");
   }

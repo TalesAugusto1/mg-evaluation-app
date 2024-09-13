@@ -7,6 +7,7 @@ exports.metadata = void 0;
 exports.default = RootLayout;
 var local_1 = __importDefault(require("next/font/local"));
 require("./globals.css");
+var authContext_1 = require("../context/authContext");
 var geistSans = (0, local_1.default)({
     src: "./fonts/GeistVF.woff",
     variable: "--font-geist-sans",
@@ -25,7 +26,9 @@ function RootLayout(_a) {
     var children = _a.children;
     return (<html lang="en">
       <body className={"".concat(geistSans.variable, " ").concat(geistMono.variable, " antialiased")}>
-        {children}
+        <authContext_1.AuthProvider>
+          {children}
+        </authContext_1.AuthProvider>
       </body>
     </html>);
 }
