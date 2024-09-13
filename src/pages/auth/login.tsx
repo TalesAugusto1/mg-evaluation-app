@@ -1,8 +1,14 @@
+"use client";
+
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/authContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,13 +19,13 @@ const Login = () => {
       },
       body: JSON.stringify({ email, password }),
     });
-  
+
     if (response.ok) {
       const data = await response.json();
-      // Armazenar o token JWT
-      localStorage.setItem('token', data.token);
+      login(data.token);
+      router.push('/');
     } else {
-      console.log(Error)
+      console.error('Login failed');
     }
   };
 

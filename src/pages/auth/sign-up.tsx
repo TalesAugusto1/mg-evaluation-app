@@ -1,9 +1,13 @@
+"use client";
+
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const SignUp = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -14,11 +18,11 @@ const SignUp = () => {
       },
       body: JSON.stringify({ name, email, password }),
     });
-  
+
     if (response.ok) {
-      // Redirecionar para a página principal
+      router.push('/');
     } else {
-      console.log(Error)
+      console.error('Registration failed');
     }
   };
 
