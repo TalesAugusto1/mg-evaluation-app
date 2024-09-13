@@ -6,7 +6,21 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Lógica de autenticação aqui
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+  
+    if (response.ok) {
+      const data = await response.json();
+      // Armazenar o token JWT
+      localStorage.setItem('token', data.token);
+    } else {
+      console.log(Error)
+    }
   };
 
   return (

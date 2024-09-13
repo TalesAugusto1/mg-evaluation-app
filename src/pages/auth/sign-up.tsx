@@ -7,7 +7,19 @@ const SignUp = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Lógica de cadastro aqui
+    const response = await fetch('/api/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email, password }),
+    });
+  
+    if (response.ok) {
+      // Redirecionar para a página principal
+    } else {
+      console.log(Error)
+    }
   };
 
   return (
