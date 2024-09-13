@@ -59,68 +59,71 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importStar(require("react"));
-var navigation_1 = require("next/navigation");
-var authContext_1 = require("../../context/authContext");
-var link_1 = __importDefault(require("next/link"));
-var Login = function () {
-    var _a = (0, react_1.useState)(''), email = _a[0], setEmail = _a[1];
-    var _b = (0, react_1.useState)(''), password = _b[0], setPassword = _b[1];
-    var router = (0, navigation_1.useRouter)();
-    var login = (0, authContext_1.useAuth)().login;
-    var handleSubmit = function (e) { return __awaiter(void 0, void 0, void 0, function () {
-        var response, data, error_1;
+var Projects = function () {
+    var _a = (0, react_1.useState)([]), projects = _a[0], setProjects = _a[1];
+    var _b = (0, react_1.useState)(''), name = _b[0], setName = _b[1];
+    var _c = (0, react_1.useState)(''), description = _c[0], setDescription = _c[1];
+    //   const router = useRouter();
+    (0, react_1.useEffect)(function () {
+        fetch('http://localhost:3001/api/projects')
+            .then(function (response) { return response.json(); })
+            .then(function (data) { return setProjects(data); });
+    }, []);
+    var handleCreate = function (e) { return __awaiter(void 0, void 0, void 0, function () {
+        var response, newProject;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     e.preventDefault();
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 6, , 7]);
-                    return [4 /*yield*/, fetch('http://localhost:3001/api/login', {
+                    return [4 /*yield*/, fetch('http://localhost:3001/api/projects', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ email: email, password: password }),
+                            body: JSON.stringify({ name: name, description: description }),
                         })];
-                case 2:
+                case 1:
                     response = _a.sent();
-                    if (!response.ok) return [3 /*break*/, 4];
+                    if (!response.ok) return [3 /*break*/, 3];
                     return [4 /*yield*/, response.json()];
-                case 3:
-                    data = _a.sent();
-                    login(data.token, data.name);
-                    router.push('/');
-                    return [3 /*break*/, 5];
-                case 4:
-                    console.error('Login failed');
-                    _a.label = 5;
-                case 5: return [3 /*break*/, 7];
-                case 6:
-                    error_1 = _a.sent();
-                    console.error('Failed to fetch:', error_1);
-                    return [3 /*break*/, 7];
-                case 7: return [2 /*return*/];
+                case 2:
+                    newProject = _a.sent();
+                    setProjects(__spreadArray(__spreadArray([], projects, true), [newProject], false));
+                    setName('');
+                    setDescription('');
+                    _a.label = 3;
+                case 3: return [2 /*return*/];
             }
         });
     }); };
     return (<div className="min-h-screen flex flex-col items-center justify-center bg-black text-white">
-      <h1 className="text-4xl font-bold mb-8">Login</h1>
-      <form onSubmit={handleSubmit} className="bg-gray-800 p-6 rounded shadow-md w-full max-w-sm">
+      <h1 className="text-4xl font-bold mb-8">Projetos</h1>
+      <form onSubmit={handleCreate} className="bg-gray-800 p-6 rounded shadow-md w-full max-w-sm mb-8">
         <div className="mb-4">
-          <input type="email" placeholder="Email" value={email} onChange={function (e) { return setEmail(e.target.value); }} className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"/>
+          <input type="text" placeholder="Nome do Projeto" value={name} onChange={function (e) { return setName(e.target.value); }} className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"/>
         </div>
         <div className="mb-4">
-          <input type="password" placeholder="Senha" value={password} onChange={function (e) { return setPassword(e.target.value); }} className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"/>
+          <input type="text" placeholder="Descrição do Projeto" value={description} onChange={function (e) { return setDescription(e.target.value); }} className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"/>
         </div>
-        <button type="submit" className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Entrar</button>
+        <button type="submit" className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Criar Projeto</button>
       </form>
-      <p className="mt-4">Não tem uma conta? <link_1.default href="/auth/sign-up" className="text-blue-500 hover:underline">Cadastre-se</link_1.default></p>
+      <div className="w-full max-w-2xl">
+        {projects.map(function (project) { return (<div key={project.id} className="bg-gray-800 p-4 rounded shadow-md mb-4">
+            <h2 className="text-2xl font-bold">{project.name}</h2>
+            <p>{project.description}</p>
+          </div>); })}
+      </div>
     </div>);
 };
-exports.default = Login;
+exports.default = Projects;

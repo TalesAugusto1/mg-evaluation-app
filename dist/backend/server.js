@@ -43,10 +43,13 @@ var express_1 = __importDefault(require("express"));
 var bcryptjs_1 = __importDefault(require("bcryptjs"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var cors_1 = __importDefault(require("cors"));
+var client_1 = require("@prisma/client");
 var app = (0, express_1.default)();
+var prisma = new client_1.PrismaClient();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 var users = [];
+//e. de usuários
 app.post("/api/register", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, name, email, password, hashedPassword;
     return __generator(this, function (_b) {
@@ -89,6 +92,87 @@ app.post("/api/login", function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); });
+//e. de projetos
+app.post("/api/projects", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, name, description, project;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _a = req.body, name = _a.name, description = _a.description;
+                return [4 /*yield*/, prisma.project.create({
+                        data: { name: name, description: description },
+                    })];
+            case 1:
+                project = _b.sent();
+                res.status(201).json(project);
+                return [2 /*return*/];
+        }
+    });
+}); });
+app.get("/api/projects", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var projects;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, prisma.project.findMany()];
+            case 1:
+                projects = _a.sent();
+                res.json(projects);
+                return [2 /*return*/];
+        }
+    });
+}); });
+app.get("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, project;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                return [4 /*yield*/, prisma.project.findUnique({
+                        where: { id: Number(id) },
+                    })];
+            case 1:
+                project = _a.sent();
+                res.json(project);
+                return [2 /*return*/];
+        }
+    });
+}); });
+app.put("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, _a, name, description, project;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                id = req.params.id;
+                _a = req.body, name = _a.name, description = _a.description;
+                return [4 /*yield*/, prisma.project.update({
+                        where: { id: Number(id) },
+                        data: { name: name, description: description },
+                    })];
+            case 1:
+                project = _b.sent();
+                res.json(project);
+                return [2 /*return*/];
+        }
+    });
+}); });
+app.delete("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                return [4 /*yield*/, prisma.project.delete({
+                        where: { id: Number(id) },
+                    })];
+            case 1:
+                _a.sent();
+                res.status(204).send();
+                return [2 /*return*/];
+        }
+    });
+}); });
+//e. de tarefas (a serem adicionados)
+// Iniciar o servidor
 app.listen(3001, function () {
     console.log("Servidor rodando na porta 3001");
 });
