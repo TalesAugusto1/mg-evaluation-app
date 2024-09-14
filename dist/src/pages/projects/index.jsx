@@ -1,5 +1,4 @@
 "use strict";
-"use client";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -68,8 +67,12 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importStar(require("react"));
+var link_1 = __importDefault(require("next/link"));
 var Projects = function () {
     var _a = (0, react_1.useState)([]), projects = _a[0], setProjects = _a[1];
     var _b = (0, react_1.useState)(''), name = _b[0], setName = _b[1];
@@ -83,7 +86,6 @@ var Projects = function () {
         fetch("http://localhost:3001/api/projects?userId=".concat(userId))
             .then(function (response) { return response.json(); })
             .then(function (data) {
-            console.log(data); // Adicione este log para verificar a resposta da API
             if (Array.isArray(data)) {
                 setProjects(data);
             }
@@ -125,9 +127,45 @@ var Projects = function () {
             }
         });
     }); };
-    return (<div className="min-h-screen flex flex-col items-center justify-center bg-black text-white">
-      <h1 className="text-4xl font-bold mb-8">Projetos</h1>
-      <form onSubmit={handleCreate} className="bg-gray-800 p-6 rounded shadow-md w-full max-w-sm mb-8">
+    var handleDelete = function (projectId) { return __awaiter(void 0, void 0, void 0, function () {
+        var confirmDelete, response, error_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    confirmDelete = window.confirm("Você tem certeza que deseja excluir este projeto?");
+                    if (!confirmDelete)
+                        return [2 /*return*/];
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, fetch("http://localhost:3001/api/projects/".concat(projectId), {
+                            method: 'DELETE',
+                        })];
+                case 2:
+                    response = _a.sent();
+                    if (response.ok) {
+                        setProjects(projects.filter(function (project) { return project.id !== projectId; }));
+                    }
+                    else {
+                        console.error('Falha ao excluir projeto');
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_1 = _a.sent();
+                    console.error('Erro ao excluir projeto:', error_1);
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    }); };
+    return (<div className="min-h-screen flex flex-col items-center justify-start bg-black text-white relative p-4">
+      <link_1.default href="/" passHref>
+        <button className="absolute top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          Voltar para Home
+        </button>
+      </link_1.default>
+      <h1 className="text-4xl font-bold mb-6">Projetos</h1>
+      <form onSubmit={handleCreate} className="bg-gray-800 p-6 rounded shadow-md w-full max-w-sm mb-6">
         <div className="mb-4">
           <input type="text" placeholder="Nome do Projeto" value={name} onChange={function (e) { return setName(e.target.value); }} className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"/>
         </div>
@@ -136,11 +174,21 @@ var Projects = function () {
         </div>
         <button type="submit" className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Criar Projeto</button>
       </form>
-      <div className="w-full max-w-2xl">
-        {Array.isArray(projects) ? (projects.map(function (project) { return (<div key={project.id} className="bg-gray-800 p-4 rounded shadow-md mb-4">
-              <h2 className="text-2xl font-bold">{project.name}</h2>
-              <p>{project.description}</p>
-            </div>); })) : (<p>Nenhum projeto encontrado.</p>)}
+      <div className="w-full max-w-5xl flex flex-wrap gap-4 justify-center">
+        {projects.map(function (project) { return (<div key={project.id} className="bg-gray-800 p-4 rounded flex flex-col items-center justify-center text-center w-60 h-32 relative">
+            <button onClick={function () { return handleDelete(project.id); }} className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+              Excluir
+            </button>
+            <link_1.default href={"/projects/".concat(project.id)} passHref>
+              
+                <button className="absolute top-2 left-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                  Editar
+                </button>
+              
+            </link_1.default>
+            <h2 className="text-xl font-bold mb-2">{project.name}</h2>
+            <p>{project.description}</p>
+          </div>); })}
       </div>
     </div>);
 };

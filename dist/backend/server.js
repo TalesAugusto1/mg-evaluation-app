@@ -293,79 +293,65 @@ app.delete("/api/projects/:id", function (req, res) { return __awaiter(void 0, v
     });
 }); });
 // Criar tarefa
-app.post("/api/projects/:id/tasks", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, _a, name, description, userId, project, user, task, error_8;
+app.post("/api/projects/:projectId/tasks", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var projectId, _a, name, description, userId, status, dueDate, newTask, error_8;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                id = req.params.id;
-                _a = req.body, name = _a.name, description = _a.description, userId = _a.userId;
-                if (!userId) {
-                    return [2 /*return*/, res.status(400).json({ error: "userId é necessário" })];
-                }
+                projectId = req.params.projectId;
+                _a = req.body, name = _a.name, description = _a.description, userId = _a.userId, status = _a.status, dueDate = _a.dueDate;
                 _b.label = 1;
             case 1:
-                _b.trys.push([1, 5, , 6]);
-                return [4 /*yield*/, prisma.project.findUnique({
-                        where: { id: id },
-                    })];
-            case 2:
-                project = _b.sent();
-                if (!project) {
-                    return [2 /*return*/, res.status(404).json({ error: "Projeto não encontrado" })];
-                }
-                return [4 /*yield*/, prisma.user.findUnique({
-                        where: { id: userId },
-                    })];
-            case 3:
-                user = _b.sent();
-                if (!user) {
-                    return [2 /*return*/, res.status(404).json({ error: "Usuário não encontrado" })];
-                }
+                _b.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma.task.create({
                         data: {
                             name: name,
                             description: description,
-                            projectId: id,
                             userId: userId,
+                            projectId: projectId,
+                            status: status,
+                            dueDate: new Date(dueDate),
                         },
                     })];
-            case 4:
-                task = _b.sent();
-                res.status(201).json(task);
-                return [3 /*break*/, 6];
-            case 5:
+            case 2:
+                newTask = _b.sent();
+                res.json(newTask);
+                return [3 /*break*/, 4];
+            case 3:
                 error_8 = _b.sent();
-                console.error("Erro ao criar tarefa:", error_8);
-                res.status(500).json({ error: "Erro ao criar tarefa" });
-                return [3 /*break*/, 6];
-            case 6: return [2 /*return*/];
+                res.status(500).json({ error: "Failed to create task" });
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); });
 // Editar tarefa
-app.put("/api/tasks/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, _a, name, description, task, error_9;
+app.put("/api/tasks/:taskId", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var taskId, _a, name, description, status, dueDate, updatedTask, error_9;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                id = req.params.id;
-                _a = req.body, name = _a.name, description = _a.description;
+                taskId = req.params.taskId;
+                _a = req.body, name = _a.name, description = _a.description, status = _a.status, dueDate = _a.dueDate;
                 _b.label = 1;
             case 1:
                 _b.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma.task.update({
-                        where: { id: id },
-                        data: { name: name, description: description },
+                        where: { id: taskId },
+                        data: {
+                            name: name,
+                            description: description,
+                            status: status, // Novo campo
+                            dueDate: new Date(dueDate), // Novo campo
+                        },
                     })];
             case 2:
-                task = _b.sent();
-                res.json(task);
+                updatedTask = _b.sent();
+                res.json(updatedTask);
                 return [3 /*break*/, 4];
             case 3:
                 error_9 = _b.sent();
-                console.error("Erro ao atualizar tarefa:", error_9);
-                res.status(500).json({ error: "Erro ao atualizar tarefa" });
+                res.status(500).json({ error: "Failed to update task" });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
         }
@@ -398,36 +384,27 @@ app.delete("/api/tasks/:id", function (req, res) { return __awaiter(void 0, void
     });
 }); });
 // Buscar todas as tarefas de um projeto
-app.get("/api/projects/:id/tasks", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, project, tasks, error_11;
+app.get("/api/projects/:projectId/tasks", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var projectId, tasks, error_11;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                id = req.params.id;
+                projectId = req.params.projectId;
                 _a.label = 1;
             case 1:
-                _a.trys.push([1, 4, , 5]);
-                return [4 /*yield*/, prisma.project.findUnique({
-                        where: { id: id },
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, prisma.task.findMany({
+                        where: { projectId: projectId },
                     })];
             case 2:
-                project = _a.sent();
-                if (!project) {
-                    return [2 /*return*/, res.status(404).json({ error: "Projeto não encontrado" })];
-                }
-                return [4 /*yield*/, prisma.task.findMany({
-                        where: { projectId: id },
-                    })];
-            case 3:
                 tasks = _a.sent();
                 res.json(tasks);
-                return [3 /*break*/, 5];
-            case 4:
+                return [3 /*break*/, 4];
+            case 3:
                 error_11 = _a.sent();
-                console.error("Erro ao buscar tarefas:", error_11);
-                res.status(500).json({ error: "Erro interno do servidor" });
-                return [3 /*break*/, 5];
-            case 5: return [2 /*return*/];
+                res.status(500).json({ error: "Failed to fetch tasks" });
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); });

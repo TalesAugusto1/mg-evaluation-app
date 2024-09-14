@@ -14,8 +14,13 @@ const ProjectDetails = () => {
   const { id } = router.query;
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTask, setNewTask] = useState<{ name: string; description: string }>({ name: '', description: '' });
-  const [editingTask, setEditingTask] = useState<{ id: string; name: string; description: string } | null>(null);
+  const [newTask, setNewTask] = useState<{ name: string; description: string; status: string; dueDate: string }>({
+    name: '', 
+    description: '', 
+    status: 'pending', 
+    dueDate: '' 
+  });
+  const [editingTask, setEditingTask] = useState<{ id: string; name: string; description: string; status: string; dueDate: string } | null>(null);
   const [editingProject, setEditingProject] = useState<{ name: string; description: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +46,7 @@ const ProjectDetails = () => {
   }, [id]);
 
   const handleAddTask = async () => {
-    if (id && newTask.name && newTask.description) {
+    if (id && newTask.name && newTask.description && newTask.status && newTask.dueDate) {
       try {
         const response = await fetch(`http://localhost:3001/api/projects/${id}/tasks`, {
           method: 'POST',
@@ -58,7 +63,7 @@ const ProjectDetails = () => {
         if (response.ok) {
           const addedTask = await response.json();
           setTasks([...tasks, addedTask]);
-          setNewTask({ name: '', description: '' }); 
+          setNewTask({ name: '', description: '', status: 'pending', dueDate: '' }); 
         } else {
           console.error('Failed to add task');
         }
@@ -81,6 +86,8 @@ const ProjectDetails = () => {
           body: JSON.stringify({
             name: editingTask.name,
             description: editingTask.description,
+            status: editingTask.status,
+            dueDate: editingTask.dueDate,
           }),
         });
 
@@ -126,7 +133,13 @@ const ProjectDetails = () => {
   };
 
   const handleTaskEditClick = (task: Task) => {
-    setEditingTask({ id: task.id, name: task.name, description: task.description });
+    setEditingTask({ 
+      id: task.id, 
+      name: task.name, 
+      description: task.description, 
+      status: task.status,
+      dueDate: task.dueDate
+    });
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -194,7 +207,7 @@ const ProjectDetails = () => {
               project.description
             )}
           </p>
-  
+
           {editingProject && (
             <button
               onClick={handleEditProject}
@@ -216,77 +229,95 @@ const ProjectDetails = () => {
               placeholder="Task name"
               value={newTask.name}
               onChange={(e) => setNewTask({ ...newTask, name: e.target.value })}
-              className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white"
+              className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
             />
-            <input
-              type="text"
+            <textarea
               placeholder="Task description"
               value={newTask.description}
               onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-              className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white mt-2"
+              className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+            />
+            <input
+              type="date"
+              placeholder="Due date"
+              value={newTask.dueDate}
+              onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+              className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
             />
             <button
               onClick={handleAddTask}
-              className="mt-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Add Task
             </button>
           </div>
 
-          {/* Tasks styled like GitHub issues */}
-          <div className="space-y-4">
-            {tasks.map((task) => (
-              <div key={task.id} className="bg-gray-800 bg-opacity-50 p-4 rounded-lg flex justify-between items-center">
-                <div>
-                  {editingTask && editingTask.id === task.id ? (
-                    <>
-                      <input
-                        type="text"
-                        value={editingTask.name}
-                        onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
-                        className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white"
-                      />
-                      <input
-                        type="text"
-                        value={editingTask.description}
-                        onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
-                        className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white mt-2"
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <h3 className="text-xl font-semibold">{task.name}</h3>
-                      <p>{task.description}</p>
-                    </>
-                  )}
-                </div>
-
-                <div className="flex space-x-2">
-                  {editingTask && editingTask.id === task.id ? (
-                    <button
-                      onClick={handleEditTask}
-                      className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    >
-                      Save
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleTaskEditClick(task)}
-                      className="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                    >
-                      <AiOutlineEdit size={20} />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDeleteTask(task.id)}
-                    className="p-2 bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    <AiOutlineDelete size={20} />
-                  </button>
-                </div>
-              </div>
-            ))}
+          {/* Tasks table */}
+          <div className="overflow-x-auto">
+            <table className="w-full bg-gray-800 text-white">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 border">Name</th>
+                  <th className="px-4 py-2 border">Description</th>
+                  <th className="px-4 py-2 border">Due Date</th>
+                  <th className="px-4 py-2 border">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tasks.map((task) => (
+                  <tr key={task.id}>
+                    <td className="px-4 py-2 border">{task.name}</td>
+                    <td className="px-4 py-2 border">{task.description}</td>
+                    <td className="px-4 py-2 border">{task.dueDate}</td>
+                    <td className="px-4 py-2 border flex items-center">
+                      <button
+                        onClick={() => handleTaskEditClick(task)}
+                        className="text-yellow-500 hover:text-yellow-600"
+                      >
+                        <AiOutlineEdit size={20} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="text-red-500 hover:text-red-600 ml-4"
+                      >
+                        <AiOutlineDelete size={20} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+
+          {/* Editing Task Form */}
+          {editingTask && (
+            <div className="mt-4 p-4 bg-gray-800 rounded">
+              <h3 className="text-xl font-bold mb-2">Edit Task</h3>
+              <input
+                type="text"
+                value={editingTask.name}
+                onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+              />
+              <textarea
+                value={editingTask.description}
+                onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+              />
+              <input
+                type="date"
+                value={editingTask.dueDate}
+                onChange={(e) => setEditingTask({ ...editingTask, dueDate: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+              />
+              <button
+                onClick={handleEditTask}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Save Changes
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

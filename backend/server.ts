@@ -39,7 +39,7 @@ app.post("/api/register", async (req: Request, res: Response) => {
         name,
         email,
         password: hashedPassword,
-        profilePicture: profilePictureBuffer, // Armazenar como BLOB
+        profilePicture: profilePictureBuffer,
       },
     });
 
@@ -137,7 +137,7 @@ app.get("/api/projects/:id", async (req: Request, res: Response) => {
   try {
     const project = await prisma.project.findUnique({
       where: { id },
-      include: { tasks: true }, // Incluindo as tarefas associadas ao projeto
+      include: { tasks: true },
     });
     if (project) {
       res.json(project);
@@ -183,64 +183,45 @@ app.delete("/api/projects/:id", async (req: Request, res: Response) => {
 });
 
 // Criar tarefa
-app.post("/api/projects/:id/tasks", async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { name, description, userId } = req.body;
-
-  if (!userId) {
-    return res.status(400).json({ error: "userId é necessário" });
-  }
+app.post("/api/projects/:projectId/tasks", async (req, res) => {
+  const { projectId } = req.params;
+  const { name, description, userId, status, dueDate } = req.body;
 
   try {
-    // Verificar se o projeto existe
-    const project = await prisma.project.findUnique({
-      where: { id },
-    });
-
-    if (!project) {
-      return res.status(404).json({ error: "Projeto não encontrado" });
-    }
-
-    // Verificar se o usuário existe
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "Usuário não encontrado" });
-    }
-
-    // Criar a tarefa
-    const task = await prisma.task.create({
+    const newTask = await prisma.task.create({
       data: {
         name,
         description,
-        projectId: id,
         userId,
+        projectId,
+        status,
+        dueDate: new Date(dueDate),
       },
     });
-
-    res.status(201).json(task);
+    res.json(newTask);
   } catch (error) {
-    console.error("Erro ao criar tarefa:", error);
-    res.status(500).json({ error: "Erro ao criar tarefa" });
+    res.status(500).json({ error: "Failed to create task" });
   }
 });
 
 // Editar tarefa
-app.put("/api/tasks/:id", async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { name, description } = req.body;
+app.put("/api/tasks/:taskId", async (req, res) => {
+  const { taskId } = req.params;
+  const { name, description, status, dueDate } = req.body;
 
   try {
-    const task = await prisma.task.update({
-      where: { id },
-      data: { name, description },
+    const updatedTask = await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        name,
+        description,
+        status,
+        dueDate: new Date(dueDate),
+      },
     });
-    res.json(task);
+    res.json(updatedTask);
   } catch (error) {
-    console.error("Erro ao atualizar tarefa:", error);
-    res.status(500).json({ error: "Erro ao atualizar tarefa" });
+    res.status(500).json({ error: "Failed to update task" });
   }
 });
 
@@ -260,28 +241,16 @@ app.delete("/api/tasks/:id", async (req: Request, res: Response) => {
 });
 
 // Buscar todas as tarefas de um projeto
-app.get("/api/projects/:id/tasks", async (req: Request, res: Response) => {
-  const { id } = req.params;
+app.get("/api/projects/:projectId/tasks", async (req, res) => {
+  const { projectId } = req.params;
 
   try {
-    // Verificar se o projeto existe
-    const project = await prisma.project.findUnique({
-      where: { id },
-    });
-
-    if (!project) {
-      return res.status(404).json({ error: "Projeto não encontrado" });
-    }
-
-    // Buscar tarefas do projeto
     const tasks = await prisma.task.findMany({
-      where: { projectId: id },
+      where: { projectId },
     });
-
     res.json(tasks);
   } catch (error) {
-    console.error("Erro ao buscar tarefas:", error);
-    res.status(500).json({ error: "Erro interno do servidor" });
+    res.status(500).json({ error: "Failed to fetch tasks" });
   }
 });
 
