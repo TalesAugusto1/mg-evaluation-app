@@ -5,7 +5,8 @@ import { useRouter } from 'next/router';
 import { Project } from '@/types/project';
 import { Task } from '@/types/task';
 import { useAuth } from '@/context/authContext';
-import { AiOutlineEdit } from 'react-icons/ai'; 
+import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai'; 
+import Link from 'next/link';
 
 const ProjectDetails = () => {
   const { userId } = useAuth();
@@ -158,6 +159,11 @@ const ProjectDetails = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white relative">
+      <Link href="/" passHref>
+        <button className="absolute top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          Voltar para Home
+        </button>
+      </Link>
       <div className="w-full max-w-4xl p-4">
         <div className="relative bg-gray-800 bg-opacity-50 p-4 rounded-lg mt-6">
           <h1 className="text-3xl font-bold mb-4">{editingProject ? (
@@ -251,31 +257,56 @@ const ProjectDetails = () => {
             </div>
           )}
   
-          <ul>
-            {tasks.map(task => (
-              <li key={task.id} className="mb-4">
-                <h3 className="text-xl font-bold">{task.name}</h3>
-                <p>{task.description}</p>
-                <button
-                  onClick={() => handleTaskEditClick(task)}
-                  className="mr-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteTask(task.id)}
-                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
+{/* Tasks Table */}
+<div className="flex justify-center">
+  <table className="w-4/5 bg-gray-800 text-white rounded-lg">
+    <thead>
+      <tr>
+        <th className="py-2 px-4 border-b">Name</th>
+        <th className="py-2 px-4 border-b">Description</th>
+        <th className="py-2 px-4 border-b">Owner</th>
+        <th className="py-2 px-4 border-b">Project ID</th>
+        <th className="py-2 px-4 border-b">Created At</th>
+        <th className="py-2 px-4 border-b">Updated At</th>
+        <th className="py-2 px-4 border-b">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {tasks.map((task) => (
+        <tr key={task.id}>
+          <td className="py-2 px-4 border-b">{task.name}</td>
+          <td className="py-2 px-4 border-b">{task.description}</td>
+          <td className="py-2 px-4 border-b">{task.userId}</td>
+          <td className="py-2 px-4 border-b">{task.projectId}</td>
+          <td className="py-2 px-4 border-b">{new Date(task.createdAt).toLocaleDateString()}</td>
+          <td className="py-2 px-4 border-b">{new Date(task.updatedAt).toLocaleDateString()}</td>
+          <td className="py-2 px-4 border-b text-center">
+            <div className="flex justify-center space-x-2">
+              <button
+                onClick={() => handleTaskEditClick(task)}
+                className="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+              >
+                <AiOutlineEdit size={20} />
+              </button>
+              <button
+                onClick={() => handleDeleteTask(task.id)}
+                className="p-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                <AiOutlineDelete size={20} />
+              </button>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+
         </div>
       </div>
     </div>
   );
-  
 };
 
 export default ProjectDetails;
