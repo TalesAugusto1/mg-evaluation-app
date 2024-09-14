@@ -97,13 +97,15 @@ var ProjectDetails = function () {
     var _c = (0, react_1.useState)({
         name: '',
         description: '',
-        status: 'pending',
-        dueDate: '' // Initialize as an empty string
+        status: 'todo', // Default status
+        dueDate: '', // Initialize as an empty string
+        assignedUserId: '' // Initialize as an empty string
     }), newTask = _c[0], setNewTask = _c[1];
     var _d = (0, react_1.useState)(null), editingTask = _d[0], setEditingTask = _d[1];
     var _e = (0, react_1.useState)(null), editingProject = _e[0], setEditingProject = _e[1];
     var _f = (0, react_1.useState)(true), loading = _f[0], setLoading = _f[1];
     var _g = (0, react_1.useState)(null), error = _g[0], setError = _g[1];
+    var _h = (0, react_1.useState)([]), users = _h[0], setUsers = _h[1]; // List of users
     (0, react_1.useEffect)(function () {
         if (id) {
             setLoading(true);
@@ -119,6 +121,11 @@ var ProjectDetails = function () {
                 .then(function (response) { return response.json(); })
                 .then(function (data) { return setTasks(data); })
                 .catch(function (err) { return setError('Failed to fetch tasks' + err); });
+            // Fetch users for task assignment
+            fetch('http://localhost:3001/api/users')
+                .then(function (response) { return response.json(); })
+                .then(function (data) { return setUsers(data); })
+                .catch(function (err) { return setError('Failed to fetch users' + err); });
         }
     }, [id]);
     var handleAddTask = function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -144,7 +151,7 @@ var ProjectDetails = function () {
                 case 3:
                     addedTask = _a.sent();
                     setTasks(__spreadArray(__spreadArray([], tasks, true), [addedTask], false));
-                    setNewTask({ name: '', description: '', status: 'pending', dueDate: '' });
+                    setNewTask({ name: '', description: '', status: 'todo', dueDate: '', assignedUserId: '' });
                     return [3 /*break*/, 5];
                 case 4:
                     console.error('Failed to add task');
@@ -181,6 +188,7 @@ var ProjectDetails = function () {
                                 description: editingTask.description,
                                 status: editingTask.status,
                                 dueDate: editingTask.dueDate,
+                                assignedUserId: editingTask.assignedUserId,
                             }),
                         })];
                 case 2:
@@ -255,7 +263,8 @@ var ProjectDetails = function () {
             name: task.name,
             description: task.description,
             status: task.status,
-            dueDate: task.dueDate // Ensure dueDate is always a string
+            dueDate: task.dueDate,
+            assignedUserId: task.assignedUserId
         });
     };
     var handleDeleteTask = function (taskId) { return __awaiter(void 0, void 0, void 0, function () {
@@ -324,6 +333,16 @@ var ProjectDetails = function () {
             <input type="text" placeholder="Task name" value={newTask.name} onChange={function (e) { return setNewTask(__assign(__assign({}, newTask), { name: e.target.value })); }} className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"/>
             <textarea placeholder="Task description" value={newTask.description} onChange={function (e) { return setNewTask(__assign(__assign({}, newTask), { description: e.target.value })); }} className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"/>
             <input type="date" placeholder="Due date" value={newTask.dueDate} onChange={function (e) { return setNewTask(__assign(__assign({}, newTask), { dueDate: e.target.value })); }} className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"/>
+            <select value={newTask.status} onChange={function (e) { return setNewTask(__assign(__assign({}, newTask), { status: e.target.value })); }} className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white">
+              <option value="todo">Todo</option>
+              <option value="in-progress">In Progress</option>
+              <option value="review">Review</option>
+              <option value="done">Done</option>
+            </select>
+            <select value={newTask.assignedUserId} onChange={function (e) { return setNewTask(__assign(__assign({}, newTask), { assignedUserId: e.target.value })); }} className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white">
+              <option value="">Assign to...</option>
+              {users.map(function (user) { return (<option key={user.id} value={user.id}>{user.name}</option>); })}
+            </select>
             <button onClick={handleAddTask} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
               Add Task
             </button>
@@ -337,14 +356,22 @@ var ProjectDetails = function () {
                   <th className="px-4 py-2 border">Name</th>
                   <th className="px-4 py-2 border">Description</th>
                   <th className="px-4 py-2 border">Due Date</th>
+                  <th className="px-4 py-2 border">Status</th>
+                  <th className="px-4 py-2 border">Assigned User</th>
                   <th className="px-4 py-2 border">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {tasks.map(function (task) { return (<tr key={task.id}>
+                {tasks.map(function (task) {
+            var _a;
+            return (<tr key={task.id}>
                     <td className="px-4 py-2 border">{task.name}</td>
                     <td className="px-4 py-2 border">{task.description}</td>
                     <td className="px-4 py-2 border">{task.dueDate}</td>
+                    <td className="px-4 py-2 border">{task.status}</td>
+                    <td className="px-4 py-2 border">
+                      {((_a = users.find(function (user) { return user.id === task.assignedUserId; })) === null || _a === void 0 ? void 0 : _a.name) || 'Unassigned'}
+                    </td>
                     <td className="px-4 py-2 border flex items-center">
                       <button onClick={function () { return handleTaskEditClick(task); }} className="text-yellow-500 hover:text-yellow-600">
                         <ai_1.AiOutlineEdit size={20}/>
@@ -353,7 +380,8 @@ var ProjectDetails = function () {
                         <ai_1.AiOutlineDelete size={20}/>
                       </button>
                     </td>
-                  </tr>); })}
+                  </tr>);
+        })}
               </tbody>
             </table>
           </div>
@@ -364,6 +392,16 @@ var ProjectDetails = function () {
               <input type="text" value={editingTask.name} onChange={function (e) { return setEditingTask(__assign(__assign({}, editingTask), { name: e.target.value })); }} className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"/>
               <textarea value={editingTask.description} onChange={function (e) { return setEditingTask(__assign(__assign({}, editingTask), { description: e.target.value })); }} className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"/>
               <input type="date" value={editingTask.dueDate} onChange={function (e) { return setEditingTask(__assign(__assign({}, editingTask), { dueDate: e.target.value })); }} className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"/>
+              <select value={editingTask.status} onChange={function (e) { return setEditingTask(__assign(__assign({}, editingTask), { status: e.target.value })); }} className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white">
+                <option value="todo">Todo</option>
+                <option value="in-progress">In Progress</option>
+                <option value="review">Review</option>
+                <option value="done">Done</option>
+              </select>
+              <select value={editingTask.assignedUserId} onChange={function (e) { return setEditingTask(__assign(__assign({}, editingTask), { assignedUserId: e.target.value })); }} className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white">
+                <option value="">Assign to...</option>
+                {users.map(function (user) { return (<option key={user.id} value={user.id}>{user.name}</option>); })}
+              </select>
               <button onClick={handleEditTask} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                 Save Changes
               </button>

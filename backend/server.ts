@@ -22,6 +22,31 @@ const bufferToBase64 = (buffer: Buffer): string => {
   return `data:image/jpeg;base64,${buffer.toString("base64")}`;
 };
 
+// Função para obter as estatísticas de tarefas de um usuário
+const getTaskStatistics = async (userId: string) => {
+  const taskCounts = await prisma.task.groupBy({
+    by: ["status"],
+    where: { userId },
+    _count: {
+      status: true,
+    },
+  });
+
+  const statistics = {
+    todo: 0,
+    inProgress: 0,
+    done: 0,
+  };
+
+  taskCounts.forEach(({ status, _count }) => {
+    if (status === "todo") statistics.todo = _count.status;
+    if (status === "in progress") statistics.inProgress = _count.status;
+    if (status === "done") statistics.done = _count.status;
+  });
+
+  return statistics;
+};
+
 // Registro de usuário
 app.post("/api/register", async (req: Request, res: Response) => {
   try {
@@ -254,6 +279,42 @@ app.get("/api/projects/:projectId/tasks", async (req, res) => {
   }
 });
 
+// Buscar todos os usuários
+app.get("/api/users", async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany();
+    res.json(users);
+  } catch (error) {
+    console.error("Erro ao buscar usuários:", error);
+    res.status(500).json({ error: "Erro ao buscar usuários" });
+  }
+});
+app.get("/api/users/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    // Obter o usuário
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: { tasks: true }, // Inclui tarefas para estatísticas
+    });
+
+    if (user) {
+      // Calcular as estatísticas das tarefas
+      const statistics = await getTaskStatistics(id);
+
+      res.json({
+        ...user,
+        taskStatistics: statistics,
+      });
+    } else {
+      res.status(404).send("Usuário não encontrado");
+    }
+  } catch (error) {
+    console.error("Erro ao buscar usuário:", error);
+    res.status(500).send("Erro interno do servidor");
+  }
+});
 app.listen(3001, () => {
   console.log("Servidor rodando na porta 3001");
 });

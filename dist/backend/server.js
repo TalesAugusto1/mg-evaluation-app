@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -58,6 +69,38 @@ var base64ToBuffer = function (base64) {
 var bufferToBase64 = function (buffer) {
     return "data:image/jpeg;base64,".concat(buffer.toString("base64"));
 };
+// Função para obter as estatísticas de tarefas de um usuário
+var getTaskStatistics = function (userId) { return __awaiter(void 0, void 0, void 0, function () {
+    var taskCounts, statistics;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, prisma.task.groupBy({
+                    by: ["status"],
+                    where: { userId: userId },
+                    _count: {
+                        status: true,
+                    },
+                })];
+            case 1:
+                taskCounts = _a.sent();
+                statistics = {
+                    todo: 0,
+                    inProgress: 0,
+                    done: 0,
+                };
+                taskCounts.forEach(function (_a) {
+                    var status = _a.status, _count = _a._count;
+                    if (status === "todo")
+                        statistics.todo = _count.status;
+                    if (status === "in progress")
+                        statistics.inProgress = _count.status;
+                    if (status === "done")
+                        statistics.done = _count.status;
+                });
+                return [2 /*return*/, statistics];
+        }
+    });
+}); };
 // Registro de usuário
 app.post("/api/register", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, name_1, email, password, profilePicture, profilePictureBuffer, hashedPassword, user, error_1;
@@ -78,7 +121,7 @@ app.post("/api/register", function (req, res) { return __awaiter(void 0, void 0,
                             name: name_1,
                             email: email,
                             password: hashedPassword,
-                            profilePicture: profilePictureBuffer, // Armazenar como BLOB
+                            profilePicture: profilePictureBuffer,
                         },
                     })];
             case 2:
@@ -218,7 +261,7 @@ app.get("/api/projects/:id", function (req, res) { return __awaiter(void 0, void
                 _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma.project.findUnique({
                         where: { id: id },
-                        include: { tasks: true }, // Incluindo as tarefas associadas ao projeto
+                        include: { tasks: true },
                     })];
             case 2:
                 project = _a.sent();
@@ -341,8 +384,8 @@ app.put("/api/tasks/:taskId", function (req, res) { return __awaiter(void 0, voi
                         data: {
                             name: name,
                             description: description,
-                            status: status, // Novo campo
-                            dueDate: new Date(dueDate), // Novo campo
+                            status: status,
+                            dueDate: new Date(dueDate),
                         },
                     })];
             case 2:
@@ -405,6 +448,61 @@ app.get("/api/projects/:projectId/tasks", function (req, res) { return __awaiter
                 res.status(500).json({ error: "Failed to fetch tasks" });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
+        }
+    });
+}); });
+// Buscar todos os usuários
+app.get("/api/users", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var users, error_12;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, prisma.user.findMany()];
+            case 1:
+                users = _a.sent();
+                res.json(users);
+                return [3 /*break*/, 3];
+            case 2:
+                error_12 = _a.sent();
+                console.error("Erro ao buscar usuários:", error_12);
+                res.status(500).json({ error: "Erro ao buscar usuários" });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+app.get("/api/users/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, user, statistics, error_13;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 6, , 7]);
+                return [4 /*yield*/, prisma.user.findUnique({
+                        where: { id: id },
+                        include: { tasks: true }, // Inclui tarefas para estatísticas
+                    })];
+            case 2:
+                user = _a.sent();
+                if (!user) return [3 /*break*/, 4];
+                return [4 /*yield*/, getTaskStatistics(id)];
+            case 3:
+                statistics = _a.sent();
+                res.json(__assign(__assign({}, user), { taskStatistics: statistics }));
+                return [3 /*break*/, 5];
+            case 4:
+                res.status(404).send("Usuário não encontrado");
+                _a.label = 5;
+            case 5: return [3 /*break*/, 7];
+            case 6:
+                error_13 = _a.sent();
+                console.error("Erro ao buscar usuário:", error_13);
+                res.status(500).send("Erro interno do servidor");
+                return [3 /*break*/, 7];
+            case 7: return [2 /*return*/];
         }
     });
 }); });

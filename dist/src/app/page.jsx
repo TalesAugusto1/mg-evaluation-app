@@ -61,9 +61,17 @@ var Home = function () {
         }
     }, [isAuthenticated, userId]);
     return (<div className="min-h-screen flex">
-      {isAuthenticated && <NavBar_1.default projects={projects}/>}
-      <MainContent_1.default projects={projects}>
-        {!isAuthenticated ? (<div className="text-center">
+      {isAuthenticated ? (<>
+          <NavBar_1.default projects={projects} userId={userId}/> {/* Passa o userId para a NavBar */}
+          <MainContent_1.default projects={projects}>
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-8">Seus Projetos</h1>
+              <p className="mb-4">Aqui você pode gerenciar seus projetos e tarefas.</p>
+              {/* Adicione mais conteúdo para usuários autenticados, se necessário */}
+            </div>
+          </MainContent_1.default>
+        </>) : (<MainContent_1.default projects={projects}>
+          <div className="text-center">
             <h1 className="text-4xl font-bold mb-8">Bem-vindo ao Nosso Site</h1>
             <p className="mb-4">Aqui você pode gerenciar seus projetos e tarefas de forma eficiente.</p>
             <p className="mb-4">Faça login ou cadastre-se para começar a usar todas as funcionalidades.</p>
@@ -75,10 +83,8 @@ var Home = function () {
                 <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Sign Up</button>
               </link_1.default>
             </div>
-          </div>) : (<div className="text-center">
-            
-          </div>)}
-      </MainContent_1.default>
+          </div>
+        </MainContent_1.default>)}
     </div>);
 };
 exports.default = Home;

@@ -6,9 +6,10 @@ import { Project } from '@/types/project';
 
 interface NavBarProps {
   projects: Project[];
+  userId: string; // Adicione a prop userId
 }
 
-const NavBar: React.FC<NavBarProps> = ({ projects }) => {
+const NavBar: React.FC<NavBarProps> = ({ projects, userId }) => {
 
   return (
     <nav className="w-64 bg-gray-800 text-white p-4 flex flex-col justify-between">
@@ -37,7 +38,12 @@ const NavBar: React.FC<NavBarProps> = ({ projects }) => {
               Projetos
             </Link>
           </li>
-          {/* espaço para mais links */}
+          {/* Link para a página de perfil do usuário */}
+          <li className="mb-2">
+            <Link href={`/users/${userId}`} className="hover:underline">
+              Meu Perfil
+            </Link>
+          </li>
         </ul>
       </div>
     </nav>

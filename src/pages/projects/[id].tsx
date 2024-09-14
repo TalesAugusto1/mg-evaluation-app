@@ -14,16 +14,18 @@ const ProjectDetails = () => {
   const { id } = router.query;
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTask, setNewTask] = useState<{ name: string; description: string; status: string; dueDate: string }>({
+  const [newTask, setNewTask] = useState<{ name: string; description: string; status: string; dueDate: string; assignedUserId: string }>({
     name: '', 
     description: '', 
-    status: 'pending', 
-    dueDate: '' 
+    status: 'todo', 
+    dueDate: '', 
+    assignedUserId: '' 
   });
-  const [editingTask, setEditingTask] = useState<{ id: string; name: string; description: string; status: string; dueDate: string } | null>(null);
+  const [editingTask, setEditingTask] = useState<{ id: string; name: string; description: string; status: string; dueDate: string; assignedUserId: string } | null>(null);
   const [editingProject, setEditingProject] = useState<{ name: string; description: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [users, setUsers] = useState<{ id: string; name: string }[]>([]); // List of users
 
   useEffect(() => {
     if (id) {
@@ -42,6 +44,12 @@ const ProjectDetails = () => {
         .then(response => response.json())
         .then(data => setTasks(data))
         .catch(err => setError('Failed to fetch tasks' + err));
+
+      // Fetch users for task assignment
+      fetch('http://localhost:3001/api/users')
+        .then(response => response.json())
+        .then(data => setUsers(data))
+        .catch(err => setError('Failed to fetch users' + err));
     }
   }, [id]);
 
@@ -63,7 +71,7 @@ const ProjectDetails = () => {
         if (response.ok) {
           const addedTask = await response.json();
           setTasks([...tasks, addedTask]);
-          setNewTask({ name: '', description: '', status: 'pending', dueDate: '' }); 
+          setNewTask({ name: '', description: '', status: 'todo', dueDate: '', assignedUserId: '' }); 
         } else {
           console.error('Failed to add task');
         }
@@ -88,6 +96,7 @@ const ProjectDetails = () => {
             description: editingTask.description,
             status: editingTask.status,
             dueDate: editingTask.dueDate,
+            assignedUserId: editingTask.assignedUserId,
           }),
         });
 
@@ -138,7 +147,8 @@ const ProjectDetails = () => {
       name: task.name, 
       description: task.description, 
       status: task.status,
-      dueDate: task.dueDate
+      dueDate: task.dueDate,
+      assignedUserId: task.assignedUserId 
     });
   };
 
@@ -244,6 +254,26 @@ const ProjectDetails = () => {
               onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
               className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
             />
+            <select
+              value={newTask.status}
+              onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
+              className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+            >
+              <option value="todo">Todo</option>
+              <option value="in-progress">In Progress</option>
+              <option value="review">Review</option>
+              <option value="done">Done</option>
+            </select>
+            <select
+              value={newTask.assignedUserId}
+              onChange={(e) => setNewTask({ ...newTask, assignedUserId: e.target.value })}
+              className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+            >
+              <option value="">Assign to...</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>{user.name}</option>
+              ))}
+            </select>
             <button
               onClick={handleAddTask}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -260,6 +290,8 @@ const ProjectDetails = () => {
                   <th className="px-4 py-2 border">Name</th>
                   <th className="px-4 py-2 border">Description</th>
                   <th className="px-4 py-2 border">Due Date</th>
+                  <th className="px-4 py-2 border">Status</th>
+                  <th className="px-4 py-2 border">Assigned User</th>
                   <th className="px-4 py-2 border">Actions</th>
                 </tr>
               </thead>
@@ -269,6 +301,10 @@ const ProjectDetails = () => {
                     <td className="px-4 py-2 border">{task.name}</td>
                     <td className="px-4 py-2 border">{task.description}</td>
                     <td className="px-4 py-2 border">{task.dueDate}</td>
+                    <td className="px-4 py-2 border">{task.status}</td>
+                    <td className="px-4 py-2 border">
+                      {users.find(user => user.id === task.assignedUserId)?.name || 'Unassigned'}
+                    </td>
                     <td className="px-4 py-2 border flex items-center">
                       <button
                         onClick={() => handleTaskEditClick(task)}
@@ -310,6 +346,26 @@ const ProjectDetails = () => {
                 onChange={(e) => setEditingTask({ ...editingTask, dueDate: e.target.value })}
                 className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
               />
+              <select
+                value={editingTask.status}
+                onChange={(e) => setEditingTask({ ...editingTask, status: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+              >
+                <option value="todo">Todo</option>
+                <option value="in-progress">In Progress</option>
+                <option value="review">Review</option>
+                <option value="done">Done</option>
+              </select>
+              <select
+                value={editingTask.assignedUserId}
+                onChange={(e) => setEditingTask({ ...editingTask, assignedUserId: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+              >
+                <option value="">Assign to...</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>{user.name}</option>
+                ))}
+              </select>
               <button
                 onClick={handleEditTask}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"

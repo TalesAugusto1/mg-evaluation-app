@@ -38,9 +38,19 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex">
-      {isAuthenticated && <NavBar projects={projects} />}
-      <MainContent projects={projects}>
-        {!isAuthenticated ? (
+      {isAuthenticated ? (
+        <>
+          <NavBar projects={projects} userId={userId!} /> {/* Passa o userId para a NavBar */}
+          <MainContent projects={projects}>
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-8">Seus Projetos</h1>
+              <p className="mb-4">Aqui você pode gerenciar seus projetos e tarefas.</p>
+              {/* Adicione mais conteúdo para usuários autenticados, se necessário */}
+            </div>
+          </MainContent>
+        </>
+      ) : (
+        <MainContent projects={projects}>
           <div className="text-center">
             <h1 className="text-4xl font-bold mb-8">Bem-vindo ao Nosso Site</h1>
             <p className="mb-4">Aqui você pode gerenciar seus projetos e tarefas de forma eficiente.</p>
@@ -54,12 +64,8 @@ const Home = () => {
               </Link>
             </div>
           </div>
-        ) : (
-          <div className="text-center">
-            
-          </div>
-        )}
-      </MainContent>
+        </MainContent>
+      )}
     </div>
   );
 };
