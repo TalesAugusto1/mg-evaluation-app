@@ -58,6 +58,7 @@ var base64ToBuffer = function (base64) {
 var bufferToBase64 = function (buffer) {
     return "data:image/jpeg;base64,".concat(buffer.toString("base64"));
 };
+// Registro de usuário
 app.post("/api/register", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, name_1, email, password, profilePicture, profilePictureBuffer, hashedPassword, user, error_1;
     return __generator(this, function (_b) {
@@ -93,6 +94,7 @@ app.post("/api/register", function (req, res) { return __awaiter(void 0, void 0,
         }
     });
 }); });
+// Login de usuário
 app.post("/api/login", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, email, password, user, _b, token, error_2;
     return __generator(this, function (_c) {
@@ -113,7 +115,7 @@ app.post("/api/login", function (req, res) { return __awaiter(void 0, void 0, vo
                 _c.label = 4;
             case 4:
                 if (_b) {
-                    token = jsonwebtoken_1.default.sign({ email: user.email }, "secreta", {
+                    token = jsonwebtoken_1.default.sign({ email: user.email, userId: user.id }, "secreta", {
                         expiresIn: "1h",
                     });
                     res.json({
@@ -138,6 +140,7 @@ app.post("/api/login", function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); });
+// Criar projeto
 app.post("/api/projects", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, name, description, userId, user, project, error_3;
     return __generator(this, function (_b) {
@@ -174,6 +177,7 @@ app.post("/api/projects", function (req, res) { return __awaiter(void 0, void 0,
         }
     });
 }); });
+// Buscar todos os projetos de um usuário
 app.get("/api/projects", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var userId, projects, error_4;
     return __generator(this, function (_a) {
@@ -202,6 +206,7 @@ app.get("/api/projects", function (req, res) { return __awaiter(void 0, void 0, 
         }
     });
 }); });
+// Buscar detalhes de um projeto, incluindo tarefas
 app.get("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, project, error_5;
     return __generator(this, function (_a) {
@@ -213,6 +218,7 @@ app.get("/api/projects/:id", function (req, res) { return __awaiter(void 0, void
                 _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma.project.findUnique({
                         where: { id: id },
+                        include: { tasks: true }, // Incluindo as tarefas associadas ao projeto
                     })];
             case 2:
                 project = _a.sent();
@@ -232,6 +238,7 @@ app.get("/api/projects/:id", function (req, res) { return __awaiter(void 0, void
         }
     });
 }); });
+// Atualizar projeto
 app.put("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, _a, name, description, project, error_6;
     return __generator(this, function (_b) {
@@ -259,6 +266,7 @@ app.put("/api/projects/:id", function (req, res) { return __awaiter(void 0, void
         }
     });
 }); });
+// Deletar projeto
 app.delete("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, error_7;
     return __generator(this, function (_a) {
@@ -281,6 +289,145 @@ app.delete("/api/projects/:id", function (req, res) { return __awaiter(void 0, v
                 res.status(500).send("Erro interno do servidor");
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
+        }
+    });
+}); });
+// Criar tarefa
+app.post("/api/projects/:id/tasks", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, _a, name, description, userId, project, user, task, error_8;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                id = req.params.id;
+                _a = req.body, name = _a.name, description = _a.description, userId = _a.userId;
+                if (!userId) {
+                    return [2 /*return*/, res.status(400).json({ error: "userId é necessário" })];
+                }
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 5, , 6]);
+                return [4 /*yield*/, prisma.project.findUnique({
+                        where: { id: id },
+                    })];
+            case 2:
+                project = _b.sent();
+                if (!project) {
+                    return [2 /*return*/, res.status(404).json({ error: "Projeto não encontrado" })];
+                }
+                return [4 /*yield*/, prisma.user.findUnique({
+                        where: { id: userId },
+                    })];
+            case 3:
+                user = _b.sent();
+                if (!user) {
+                    return [2 /*return*/, res.status(404).json({ error: "Usuário não encontrado" })];
+                }
+                return [4 /*yield*/, prisma.task.create({
+                        data: {
+                            name: name,
+                            description: description,
+                            projectId: id,
+                            userId: userId,
+                        },
+                    })];
+            case 4:
+                task = _b.sent();
+                res.status(201).json(task);
+                return [3 /*break*/, 6];
+            case 5:
+                error_8 = _b.sent();
+                console.error("Erro ao criar tarefa:", error_8);
+                res.status(500).json({ error: "Erro ao criar tarefa" });
+                return [3 /*break*/, 6];
+            case 6: return [2 /*return*/];
+        }
+    });
+}); });
+// Editar tarefa
+app.put("/api/tasks/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, _a, name, description, task, error_9;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                id = req.params.id;
+                _a = req.body, name = _a.name, description = _a.description;
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, prisma.task.update({
+                        where: { id: id },
+                        data: { name: name, description: description },
+                    })];
+            case 2:
+                task = _b.sent();
+                res.json(task);
+                return [3 /*break*/, 4];
+            case 3:
+                error_9 = _b.sent();
+                console.error("Erro ao atualizar tarefa:", error_9);
+                res.status(500).json({ error: "Erro ao atualizar tarefa" });
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); });
+// Deletar tarefa
+app.delete("/api/tasks/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, error_10;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, prisma.task.delete({
+                        where: { id: id },
+                    })];
+            case 2:
+                _a.sent();
+                res.status(204).send();
+                return [3 /*break*/, 4];
+            case 3:
+                error_10 = _a.sent();
+                console.error("Erro ao deletar tarefa:", error_10);
+                res.status(500).json({ error: "Erro ao deletar tarefa" });
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); });
+// Buscar todas as tarefas de um projeto
+app.get("/api/projects/:id/tasks", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, project, tasks, error_11;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 4, , 5]);
+                return [4 /*yield*/, prisma.project.findUnique({
+                        where: { id: id },
+                    })];
+            case 2:
+                project = _a.sent();
+                if (!project) {
+                    return [2 /*return*/, res.status(404).json({ error: "Projeto não encontrado" })];
+                }
+                return [4 /*yield*/, prisma.task.findMany({
+                        where: { projectId: id },
+                    })];
+            case 3:
+                tasks = _a.sent();
+                res.json(tasks);
+                return [3 /*break*/, 5];
+            case 4:
+                error_11 = _a.sent();
+                console.error("Erro ao buscar tarefas:", error_11);
+                res.status(500).json({ error: "Erro interno do servidor" });
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
         }
     });
 }); });
