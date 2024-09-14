@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '@/context/authContext';
 import { Project } from '@/types/project';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface MainContentProps {
   children: React.ReactNode;
@@ -10,9 +11,7 @@ interface MainContentProps {
 
 const MainContent: React.FC<MainContentProps> = ({ children, projects }) => {
   const { name, profilePicture, logout } = useAuth();
-
-  // Verificar o valor de profilePicture
-  console.log('Profile Picture:', profilePicture);
+  console.log(profilePicture)
 
   return (
     <div className="flex-1 flex flex-col bg-black text-white relative">
@@ -23,11 +22,15 @@ const MainContent: React.FC<MainContentProps> = ({ children, projects }) => {
         
         {/* Foto de perfil */}
         {profilePicture ? (
-          <img 
-            src={`data:image/jpeg;base64,${profilePicture}`}
-            alt="Foto de Perfil" 
-            className="w-12 h-12 rounded-full object-cover"
-          />
+          <div className="w-12 h-12 rounded-full overflow-hidden">
+            <Image 
+              src={profilePicture} 
+              alt="Foto de perfil" 
+              width={48} 
+              height={48} 
+              layout="fixed" 
+            />
+          </div>
         ) : (
           <div className="w-12 h-12 rounded-full bg-gray-500"></div>
         )}

@@ -24,10 +24,9 @@ const Login = () => {
       });
   
       if (response.ok) {
-        const { token, name, userId } = await response.json();
-        console.log('Login successful:', { token, name, userId });
-        login(token, name, userId); 
-        router.push('/');
+        const { token, name, userId, profilePicture } = await response.json();
+        console.log('Login successful:', { token, name, userId, profilePicture });
+        login(token, name, userId, profilePicture);         router.push('/');
       } else {
         console.error('Login failed');
       }
@@ -35,6 +34,7 @@ const Login = () => {
       console.error('Error during login:', error);
     }
   };
+  
   
 
   return (
