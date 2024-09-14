@@ -204,10 +204,12 @@ const ProjectDetails = () => {
             </button>
           )}
         </div>
-  
+
         {/* Tasks section */}
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Tasks</h2>
+
+          {/* Input fields for new task */}
           <div className="mb-4">
             <input
               type="text"
@@ -230,79 +232,61 @@ const ProjectDetails = () => {
               Add Task
             </button>
           </div>
-  
-          {editingTask && (
-            <div className="mb-4">
-              <h3 className="text-xl font-bold mb-2">Edit Task</h3>
-              <input
-                type="text"
-                placeholder="Task name"
-                value={editingTask.name}
-                onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
-                className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white"
-              />
-              <input
-                type="text"
-                placeholder="Task description"
-                value={editingTask.description}
-                onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
-                className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white mt-2"
-              />
-              <button
-                onClick={handleEditTask}
-                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Save Changes
-              </button>
-            </div>
-          )}
-  
-{/* Tasks Table */}
-<div className="flex justify-center">
-  <table className="w-4/5 bg-gray-800 text-white rounded-lg">
-    <thead>
-      <tr>
-        <th className="py-2 px-4 border-b">Name</th>
-        <th className="py-2 px-4 border-b">Description</th>
-        <th className="py-2 px-4 border-b">Owner</th>
-        <th className="py-2 px-4 border-b">Project ID</th>
-        <th className="py-2 px-4 border-b">Created At</th>
-        <th className="py-2 px-4 border-b">Updated At</th>
-        <th className="py-2 px-4 border-b">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {tasks.map((task) => (
-        <tr key={task.id}>
-          <td className="py-2 px-4 border-b">{task.name}</td>
-          <td className="py-2 px-4 border-b">{task.description}</td>
-          <td className="py-2 px-4 border-b">{task.userId}</td>
-          <td className="py-2 px-4 border-b">{task.projectId}</td>
-          <td className="py-2 px-4 border-b">{new Date(task.createdAt).toLocaleDateString()}</td>
-          <td className="py-2 px-4 border-b">{new Date(task.updatedAt).toLocaleDateString()}</td>
-          <td className="py-2 px-4 border-b text-center">
-            <div className="flex justify-center space-x-2">
-              <button
-                onClick={() => handleTaskEditClick(task)}
-                className="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-              >
-                <AiOutlineEdit size={20} />
-              </button>
-              <button
-                onClick={() => handleDeleteTask(task.id)}
-                className="p-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                <AiOutlineDelete size={20} />
-              </button>
-            </div>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
 
+          {/* Tasks styled like GitHub issues */}
+          <div className="space-y-4">
+            {tasks.map((task) => (
+              <div key={task.id} className="bg-gray-800 bg-opacity-50 p-4 rounded-lg flex justify-between items-center">
+                <div>
+                  {editingTask && editingTask.id === task.id ? (
+                    <>
+                      <input
+                        type="text"
+                        value={editingTask.name}
+                        onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
+                        className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white"
+                      />
+                      <input
+                        type="text"
+                        value={editingTask.description}
+                        onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
+                        className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white mt-2"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-xl font-semibold">{task.name}</h3>
+                      <p>{task.description}</p>
+                    </>
+                  )}
+                </div>
 
+                <div className="flex space-x-2">
+                  {editingTask && editingTask.id === task.id ? (
+                    <button
+                      onClick={handleEditTask}
+                      className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Save
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleTaskEditClick(task)}
+                      className="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                    >
+                      <AiOutlineEdit size={20} />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeleteTask(task.id)}
+                    className="p-2 bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    <AiOutlineDelete size={20} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
