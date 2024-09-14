@@ -11,12 +11,17 @@ interface MainContentProps {
 }
 
 const MainContent: React.FC<MainContentProps> = ({ children, projects }) => {
-  const { user, logout } = useAuth();
+  const { name, logout } = useAuth();
+
+  console.log('Rendering MainContent with name:', name); 
+
   return (
     <div className="flex-1 flex flex-col bg-black text-white relative">
       <div className="flex justify-between items-center w-full p-4">
-        <div className="text-xl">Bem-vindo, {user?.name}!</div>
-        <button onClick={logout} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Logout</button>
+        {name && <div className="text-xl">Bem-vindo, {name}!</div>}
+        {name && (
+          <button onClick={logout} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Logout</button>
+        )}
       </div>
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         {children}

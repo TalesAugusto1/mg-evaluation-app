@@ -8,26 +8,33 @@ generator client {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String
-  email    String @unique
-  password String
+  id             Int       @id @default(autoincrement())
+  name           String
+  email          String    @unique
+  password       String
+  profilePicture Bytes?
+  projects       Project[]
+
+  Task Task[]
 }
 
 model Project {
   id          Int    @id @default(autoincrement())
   name        String
   description String
-  tasks       Task[]
+  userId      Int
+  user        User   @relation(fields: [userId], references: [id])
+  tasks       Task[] // Relaciona o projeto com várias tarefas
 }
 
 model Task {
   id          Int      @id @default(autoincrement())
   name        String
   description String
-  status      String
-  dueDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
   projectId   Int
   project     Project  @relation(fields: [projectId], references: [id])
-  assignedTo  String
 }

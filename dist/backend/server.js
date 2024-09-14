@@ -43,15 +43,16 @@ var express_1 = __importDefault(require("express"));
 var bcryptjs_1 = __importDefault(require("bcryptjs"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var cors_1 = __importDefault(require("cors"));
+var multer_1 = __importDefault(require("multer"));
 var client_1 = require("@prisma/client");
 var app = (0, express_1.default)();
 var prisma = new client_1.PrismaClient();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
-var users = [];
-//e. de usuários
-app.post("/api/register", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, name, email, password, hashedPassword;
+var upload = (0, multer_1.default)();
+// Register user
+app.post("/api/register", upload.single("profilePicture"), function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, name, email, password, hashedPassword, profilePicture, user, error_1;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -59,120 +60,215 @@ app.post("/api/register", function (req, res) { return __awaiter(void 0, void 0,
                 return [4 /*yield*/, bcryptjs_1.default.hash(password, 10)];
             case 1:
                 hashedPassword = _b.sent();
-                users.push({ name: name, email: email, password: hashedPassword });
+                profilePicture = req.file ? req.file.buffer : undefined;
+                _b.label = 2;
+            case 2:
+                _b.trys.push([2, 4, , 5]);
+                return [4 /*yield*/, prisma.user.create({
+                        data: { name: name, email: email, password: hashedPassword, profilePicture: profilePicture },
+                    })];
+            case 3:
+                user = _b.sent();
+                console.log(user);
                 res.status(201).send("Usuário registrado com sucesso");
-                return [2 /*return*/];
+                return [3 /*break*/, 5];
+            case 4:
+                error_1 = _b.sent();
+                console.error("Erro ao registrar usuário:", error_1);
+                res.status(500).send("Erro interno do servidor");
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
         }
     });
 }); });
+// Login user
 app.post("/api/login", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, email, password, user, _b, token;
+    var _a, email, password, user, _b, token, error_2;
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
                 _a = req.body, email = _a.email, password = _a.password;
-                user = users.find(function (u) { return u.email === email; });
-                _b = user;
-                if (!_b) return [3 /*break*/, 2];
-                return [4 /*yield*/, bcryptjs_1.default.compare(password, user.password)];
+                _c.label = 1;
             case 1:
-                _b = (_c.sent());
-                _c.label = 2;
+                _c.trys.push([1, 5, , 6]);
+                return [4 /*yield*/, prisma.user.findUnique({ where: { email: email } })];
             case 2:
+                user = _c.sent();
+                _b = user;
+                if (!_b) return [3 /*break*/, 4];
+                return [4 /*yield*/, bcryptjs_1.default.compare(password, user.password)];
+            case 3:
+                _b = (_c.sent());
+                _c.label = 4;
+            case 4:
                 if (_b) {
                     token = jsonwebtoken_1.default.sign({ email: user.email }, "secreta", {
                         expiresIn: "1h",
                     });
-                    res.json({ token: token, name: user.name });
+                    res.json({ token: token, name: user.name, userId: user.id });
                 }
                 else {
                     res.status(401).send("Credenciais inválidas");
                 }
-                return [2 /*return*/];
+                return [3 /*break*/, 6];
+            case 5:
+                error_2 = _c.sent();
+                console.error("Erro ao fazer login:", error_2);
+                res.status(500).send("Erro interno do servidor");
+                return [3 /*break*/, 6];
+            case 6: return [2 /*return*/];
         }
     });
 }); });
-//e. de projetos
+// Create project
 app.post("/api/projects", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, name, description, project;
+    var _a, name, description, userId, user, project, error_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _a = req.body, name = _a.name, description = _a.description;
-                return [4 /*yield*/, prisma.project.create({
-                        data: { name: name, description: description },
-                    })];
+                _a = req.body, name = _a.name, description = _a.description, userId = _a.userId;
+                _b.label = 1;
             case 1:
+                _b.trys.push([1, 4, , 5]);
+                return [4 /*yield*/, prisma.user.findUnique({
+                        where: { id: Number(userId) },
+                    })];
+            case 2:
+                user = _b.sent();
+                if (!user) {
+                    return [2 /*return*/, res.status(400).json({ error: "Usuário não encontrado" })];
+                }
+                return [4 /*yield*/, prisma.project.create({
+                        data: { name: name, description: description, userId: Number(userId) },
+                    })];
+            case 3:
                 project = _b.sent();
                 res.status(201).json(project);
-                return [2 /*return*/];
+                return [3 /*break*/, 5];
+            case 4:
+                error_3 = _b.sent();
+                console.error("Erro ao criar projeto:", error_3);
+                res.status(500).send("Erro interno do servidor");
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
         }
     });
 }); });
+// Get all projects for a specific user
 app.get("/api/projects", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var projects;
+    var userId, projects, error_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, prisma.project.findMany()];
+            case 0:
+                userId = Number(req.query.userId);
+                if (!userId) {
+                    return [2 /*return*/, res.status(400).json({ error: "userId é necessário" })];
+                }
+                _a.label = 1;
             case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, prisma.project.findMany({
+                        where: { userId: userId },
+                    })];
+            case 2:
                 projects = _a.sent();
                 res.json(projects);
-                return [2 /*return*/];
+                return [3 /*break*/, 4];
+            case 3:
+                error_4 = _a.sent();
+                console.error("Erro ao buscar projetos:", error_4);
+                res.status(500).send("Erro interno do servidor");
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); });
+// Get project by ID
 app.get("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, project;
+    var id, project, error_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 id = req.params.id;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma.project.findUnique({
                         where: { id: Number(id) },
                     })];
-            case 1:
+            case 2:
                 project = _a.sent();
-                res.json(project);
-                return [2 /*return*/];
+                if (project) {
+                    res.json(project);
+                }
+                else {
+                    res.status(404).send("Projeto não encontrado");
+                }
+                return [3 /*break*/, 4];
+            case 3:
+                error_5 = _a.sent();
+                console.error("Erro ao buscar projeto:", error_5);
+                res.status(500).send("Erro interno do servidor");
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); });
+// Update project
 app.put("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, _a, name, description, project;
+    var id, _a, name, description, project, error_6;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 id = req.params.id;
                 _a = req.body, name = _a.name, description = _a.description;
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma.project.update({
                         where: { id: Number(id) },
                         data: { name: name, description: description },
                     })];
-            case 1:
+            case 2:
                 project = _b.sent();
                 res.json(project);
-                return [2 /*return*/];
+                return [3 /*break*/, 4];
+            case 3:
+                error_6 = _b.sent();
+                console.error("Erro ao atualizar projeto:", error_6);
+                res.status(500).send("Erro interno do servidor");
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); });
+// Delete project
 app.delete("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id;
+    var id, error_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 id = req.params.id;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma.project.delete({
                         where: { id: Number(id) },
                     })];
-            case 1:
+            case 2:
                 _a.sent();
                 res.status(204).send();
-                return [2 /*return*/];
+                return [3 /*break*/, 4];
+            case 3:
+                error_7 = _a.sent();
+                console.error("Erro ao deletar projeto:", error_7);
+                res.status(500).send("Erro interno do servidor");
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); });
-//e. de tarefas (a serem adicionados)
-// Iniciar o servidor
+// Start the server
 app.listen(3001, function () {
     console.log("Servidor rodando na porta 3001");
 });

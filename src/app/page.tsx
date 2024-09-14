@@ -8,16 +8,33 @@ import { Project } from '@/types/project';
 import Link from 'next/link';
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userId } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetch('http://localhost:3001/api/projects')
+    console.log('Home - isAuthenticated:', isAuthenticated);
+    console.log('Home - userId:', userId);
+
+    if (isAuthenticated && userId) {
+      fetch(`http://localhost:3001/api/projects?userId=${userId}`)
         .then(response => response.json())
-        .then(data => setProjects(data));
+        .then(data => {
+          console.log('Fetched projects:', data);
+          if (Array.isArray(data)) {
+            setProjects(data);
+          } else {
+            console.error('Data fetched is not an array');
+            setProjects([]);
+          }
+        })
+        .catch(error => {
+          console.error('Failed to fetch projects:', error);
+          setProjects([]);
+        });
+    } else {
+      setProjects([]);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, userId]);
 
   return (
     <div className="min-h-screen flex">
@@ -39,6 +56,7 @@ const Home = () => {
           </div>
         ) : (
           <div className="text-center">
+            
           </div>
         )}
       </MainContent>

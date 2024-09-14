@@ -74,24 +74,34 @@ var Projects = function () {
     var _a = (0, react_1.useState)([]), projects = _a[0], setProjects = _a[1];
     var _b = (0, react_1.useState)(''), name = _b[0], setName = _b[1];
     var _c = (0, react_1.useState)(''), description = _c[0], setDescription = _c[1];
-    //   const router = useRouter();
+    // Modificação no useEffect para incluir o userId
     (0, react_1.useEffect)(function () {
-        fetch('http://localhost:3001/api/projects')
+        var userId = localStorage.getItem("userId");
+        if (!userId) {
+            console.error("Usuário não está logado.");
+            return;
+        }
+        fetch("http://localhost:3001/api/projects?userId=".concat(userId))
             .then(function (response) { return response.json(); })
             .then(function (data) { return setProjects(data); });
     }, []);
     var handleCreate = function (e) { return __awaiter(void 0, void 0, void 0, function () {
-        var response, newProject;
+        var userId, response, newProject;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     e.preventDefault();
+                    userId = localStorage.getItem("userId");
+                    if (!userId) {
+                        console.error("Usuário não está logado ou o userId não foi encontrado.");
+                        return [2 /*return*/];
+                    }
                     return [4 /*yield*/, fetch('http://localhost:3001/api/projects', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ name: name, description: description }),
+                            body: JSON.stringify({ name: name, description: description, userId: userId }),
                         })];
                 case 1:
                     response = _a.sent();

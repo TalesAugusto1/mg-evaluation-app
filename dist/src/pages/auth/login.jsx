@@ -65,22 +65,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importStar(require("react"));
 var navigation_1 = require("next/navigation");
-var authContext_1 = require("../../context/authContext");
+var authContext_1 = require("@/context/authContext");
 var link_1 = __importDefault(require("next/link"));
 var Login = function () {
     var _a = (0, react_1.useState)(''), email = _a[0], setEmail = _a[1];
     var _b = (0, react_1.useState)(''), password = _b[0], setPassword = _b[1];
-    var router = (0, navigation_1.useRouter)();
     var login = (0, authContext_1.useAuth)().login;
+    var router = (0, navigation_1.useRouter)();
     var handleSubmit = function (e) { return __awaiter(void 0, void 0, void 0, function () {
-        var response, data, error_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var response, _a, token, name_1, userId, error_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     e.preventDefault();
-                    _a.label = 1;
+                    _b.label = 1;
                 case 1:
-                    _a.trys.push([1, 6, , 7]);
+                    _b.trys.push([1, 6, , 7]);
                     return [4 /*yield*/, fetch('http://localhost:3001/api/login', {
                             method: 'POST',
                             headers: {
@@ -89,21 +89,21 @@ var Login = function () {
                             body: JSON.stringify({ email: email, password: password }),
                         })];
                 case 2:
-                    response = _a.sent();
+                    response = _b.sent();
                     if (!response.ok) return [3 /*break*/, 4];
                     return [4 /*yield*/, response.json()];
                 case 3:
-                    data = _a.sent();
-                    login(data.token, data.name);
+                    _a = _b.sent(), token = _a.token, name_1 = _a.name, userId = _a.userId;
+                    login(token, name_1, userId);
                     router.push('/');
                     return [3 /*break*/, 5];
                 case 4:
-                    console.error('Login failed');
-                    _a.label = 5;
+                    console.error('Login falhou');
+                    _b.label = 5;
                 case 5: return [3 /*break*/, 7];
                 case 6:
-                    error_1 = _a.sent();
-                    console.error('Failed to fetch:', error_1);
+                    error_1 = _b.sent();
+                    console.error('Erro ao fazer login:', error_1);
                     return [3 /*break*/, 7];
                 case 7: return [2 /*return*/];
             }
@@ -118,9 +118,9 @@ var Login = function () {
         <div className="mb-4">
           <input type="password" placeholder="Senha" value={password} onChange={function (e) { return setPassword(e.target.value); }} className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"/>
         </div>
-        <button type="submit" className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Entrar</button>
+        <button type="submit" className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Entrar</button>
       </form>
-      <p className="mt-4">Não tem uma conta? <link_1.default href="/auth/sign-up" className="text-blue-500 hover:underline">Cadastre-se</link_1.default></p>
+      <p className="mt-4">Ainda não tem uma conta? <link_1.default href="/auth/sign-up" className="text-blue-500 hover:underline">Cadastrar</link_1.default></p>
     </div>);
 };
 exports.default = Login;

@@ -1,34 +1,58 @@
 "use strict";
 "use client";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useAuth = exports.AuthProvider = void 0;
-var react_1 = require("react");
+var react_1 = __importStar(require("react"));
 var AuthContext = (0, react_1.createContext)(undefined);
 var AuthProvider = function (_a) {
     var children = _a.children;
     var _b = (0, react_1.useState)(false), isAuthenticated = _b[0], setIsAuthenticated = _b[1];
-    var _c = (0, react_1.useState)(null), user = _c[0], setUser = _c[1];
-    (0, react_1.useEffect)(function () {
-        var token = localStorage.getItem('token');
-        var name = localStorage.getItem('name');
-        if (token && name) {
-            setIsAuthenticated(true);
-            setUser({ name: name });
-        }
-    }, []);
-    var login = function (token, name) {
+    var _c = (0, react_1.useState)(undefined), userId = _c[0], setUserId = _c[1];
+    var _d = (0, react_1.useState)(undefined), token = _d[0], setToken = _d[1];
+    var _e = (0, react_1.useState)(undefined), name = _e[0], setName = _e[1];
+    var login = function (token, name, userId) {
+        setIsAuthenticated(true);
+        setToken(token);
+        setName(name);
+        setUserId(userId);
         localStorage.setItem('token', token);
         localStorage.setItem('name', name);
-        setIsAuthenticated(true);
-        setUser({ name: name });
+        localStorage.setItem('userId', userId);
     };
     var logout = function () {
+        console.log('Logging out...');
+        setIsAuthenticated(false);
+        setToken(undefined);
+        setName(undefined);
+        setUserId(undefined);
         localStorage.removeItem('token');
         localStorage.removeItem('name');
-        setIsAuthenticated(false);
-        setUser(null);
+        localStorage.removeItem('userId');
     };
-    return (<AuthContext.Provider value={{ isAuthenticated: isAuthenticated, user: user, login: login, logout: logout }}>
+    return (<AuthContext.Provider value={{ isAuthenticated: isAuthenticated, userId: userId, token: token, name: name, login: login, logout: logout }}>
       {children}
     </AuthContext.Provider>);
 };

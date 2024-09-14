@@ -1,29 +1,42 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-// import { useRouter } from 'next/navigation';
 import { Project } from '@/types/project';
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-//   const router = useRouter();
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/projects')
+    const userId = localStorage.getItem("userId");
+
+    if (!userId) {
+      console.error("Usuário não está logado.");
+      return;
+    }
+
+    fetch(`http://localhost:3001/api/projects?userId=${userId}`)
       .then(response => response.json())
       .then(data => setProjects(data));
   }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const userId = localStorage.getItem("userId");
+
+    if (!userId) {
+      console.error("Usuário não está logado ou o userId não foi encontrado.");
+      return;
+    }
+
     const response = await fetch('http://localhost:3001/api/projects', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, description }),
+      body: JSON.stringify({ name, description, userId }), 
     });
 
     if (response.ok) {
