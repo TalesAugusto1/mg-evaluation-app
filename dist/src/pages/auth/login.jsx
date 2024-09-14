@@ -73,7 +73,7 @@ var Login = function () {
     var login = (0, authContext_1.useAuth)().login;
     var router = (0, navigation_1.useRouter)();
     var handleSubmit = function (e) { return __awaiter(void 0, void 0, void 0, function () {
-        var response, _a, token, name_1, userId, error_1;
+        var response, _a, token, name_1, userId, profilePicture, error_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -93,9 +93,9 @@ var Login = function () {
                     if (!response.ok) return [3 /*break*/, 4];
                     return [4 /*yield*/, response.json()];
                 case 3:
-                    _a = _b.sent(), token = _a.token, name_1 = _a.name, userId = _a.userId;
-                    console.log('Login successful:', { token: token, name: name_1, userId: userId });
-                    login(token, name_1, userId);
+                    _a = _b.sent(), token = _a.token, name_1 = _a.name, userId = _a.userId, profilePicture = _a.profilePicture;
+                    console.log('Login successful:', { token: token, name: name_1, userId: userId, profilePicture: profilePicture });
+                    login(token, name_1, userId, profilePicture);
                     router.push('/');
                     return [3 /*break*/, 5];
                 case 4:

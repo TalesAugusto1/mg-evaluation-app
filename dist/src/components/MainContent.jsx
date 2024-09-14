@@ -6,11 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importDefault(require("react"));
 var authContext_1 = require("@/context/authContext");
 var link_1 = __importDefault(require("next/link"));
+var image_1 = __importDefault(require("next/image"));
 var MainContent = function (_a) {
     var children = _a.children, projects = _a.projects;
     var _b = (0, authContext_1.useAuth)(), name = _b.name, profilePicture = _b.profilePicture, logout = _b.logout;
-    // Verificar o valor de profilePicture
-    console.log('Profile Picture:', profilePicture);
+    console.log(profilePicture);
     return (<div className="flex-1 flex flex-col bg-black text-white relative">
       {/* Header */}
       <div className="flex justify-between items-center w-full p-4 bg-gray-900">
@@ -18,10 +18,9 @@ var MainContent = function (_a) {
         {name && <div className="text-xl">Bem-vindo, {name}!</div>}
         
         {/* Foto de perfil */}
-        {profilePicture ? (<img src={"data:image/jpeg;base64,".concat(profilePicture)} // Certifique-se de que a URL base64 está correta
-         alt="Foto de Perfil" className="w-12 h-12 rounded-full object-cover" // Adicione object-cover para evitar distorção
-        />) : (<div className="w-12 h-12 rounded-full bg-gray-500"></div> // Placeholder quando não há foto
-        )}
+        {profilePicture ? (<div className="w-12 h-12 rounded-full overflow-hidden">
+            <image_1.default src={profilePicture} alt="Foto de perfil" width={48} height={48} layout="fixed"/>
+          </div>) : (<div className="w-12 h-12 rounded-full bg-gray-500"></div>)}
 
         {/* Botão de logout */}
         {name && (<button onClick={logout} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">

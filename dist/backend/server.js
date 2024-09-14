@@ -49,16 +49,25 @@ var prisma = new client_1.PrismaClient();
 app.use(express_1.default.json({ limit: "50mb" }));
 app.use(express_1.default.urlencoded({ limit: "50mb", extended: true }));
 app.use((0, cors_1.default)());
+// Função para converter base64 para buffer
+var base64ToBuffer = function (base64) {
+    var base64Data = base64.split(",")[1];
+    return Buffer.from(base64Data, "base64");
+};
+// Função para converter buffer para base64
+var bufferToBase64 = function (buffer) {
+    return "data:image/jpeg;base64,".concat(buffer.toString("base64"));
+};
 app.post("/api/register", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, name_1, email, password, profilePicture, profilePictureBase64, hashedPassword, user, error_1;
+    var _a, name_1, email, password, profilePicture, profilePictureBuffer, hashedPassword, user, error_1;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 _b.trys.push([0, 3, , 4]);
                 _a = req.body, name_1 = _a.name, email = _a.email, password = _a.password, profilePicture = _a.profilePicture;
-                profilePictureBase64 = null;
+                profilePictureBuffer = void 0;
                 if (profilePicture) {
-                    profilePictureBase64 = profilePicture; // já é uma string base64
+                    profilePictureBuffer = base64ToBuffer(profilePicture);
                 }
                 return [4 /*yield*/, bcryptjs_1.default.hash(password, 10)];
             case 1:
@@ -68,7 +77,7 @@ app.post("/api/register", function (req, res) { return __awaiter(void 0, void 0,
                             name: name_1,
                             email: email,
                             password: hashedPassword,
-                            profilePicture: profilePictureBase64,
+                            profilePicture: profilePictureBuffer, // Armazenar como BLOB
                         },
                     })];
             case 2:
@@ -111,7 +120,9 @@ app.post("/api/login", function (req, res) { return __awaiter(void 0, void 0, vo
                         token: token,
                         name: user.name,
                         userId: user.id,
-                        profilePicture: user.profilePicture,
+                        profilePicture: user.profilePicture
+                            ? bufferToBase64(user.profilePicture)
+                            : undefined,
                     });
                 }
                 else {
@@ -140,7 +151,7 @@ app.post("/api/projects", function (req, res) { return __awaiter(void 0, void 0,
             case 1:
                 _b.trys.push([1, 4, , 5]);
                 return [4 /*yield*/, prisma.user.findUnique({
-                        where: { id: userId }, // userId deve ser uma string
+                        where: { id: userId },
                     })];
             case 2:
                 user = _b.sent();

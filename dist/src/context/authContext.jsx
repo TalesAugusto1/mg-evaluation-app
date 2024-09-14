@@ -33,19 +33,19 @@ var AuthProvider = function (_a) {
     var _c = (0, react_1.useState)(undefined), userId = _c[0], setUserId = _c[1];
     var _d = (0, react_1.useState)(undefined), token = _d[0], setToken = _d[1];
     var _e = (0, react_1.useState)(undefined), name = _e[0], setName = _e[1];
-    var _f = (0, react_1.useState)(undefined), profilePicture = _f[0], setProfilePicture = _f[1]; // Adicionado
+    var _f = (0, react_1.useState)(undefined), profilePicture = _f[0], setProfilePicture = _f[1];
     (0, react_1.useEffect)(function () {
         // Verificar e recuperar os dados do localStorage ao iniciar
         var storedToken = localStorage.getItem('token');
         var storedName = localStorage.getItem('name');
         var storedUserId = localStorage.getItem('userId');
-        var storedProfilePicture = localStorage.getItem('profilePicture'); // Adicionado
+        var storedProfilePicture = localStorage.getItem('profilePicture');
         if (storedToken && storedName && storedUserId) {
             setIsAuthenticated(true);
             setToken(storedToken);
             setName(storedName);
             setUserId(storedUserId);
-            setProfilePicture(storedProfilePicture || undefined); // Adicionado
+            setProfilePicture(storedProfilePicture || undefined);
         }
     }, []);
     var login = function (token, name, userId, profilePicture) {

@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cors from "cors";
-
 import { PrismaClient } from "@prisma/client";
 
 const app = express();
@@ -10,16 +9,26 @@ const prisma = new PrismaClient();
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
-
 app.use(cors());
 
-app.post("/api/register", async (req, res) => {
+// Função para converter base64 para buffer
+const base64ToBuffer = (base64: string): Buffer => {
+  const base64Data = base64.split(",")[1];
+  return Buffer.from(base64Data, "base64");
+};
+
+// Função para converter buffer para base64
+const bufferToBase64 = (buffer: Buffer): string => {
+  return `data:image/jpeg;base64,${buffer.toString("base64")}`;
+};
+
+app.post("/api/register", async (req: Request, res: Response) => {
   try {
     const { name, email, password, profilePicture } = req.body;
-    let profilePictureBase64 = null;
+    let profilePictureBuffer: Buffer | undefined;
 
     if (profilePicture) {
-      profilePictureBase64 = profilePicture;
+      profilePictureBuffer = base64ToBuffer(profilePicture);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -29,7 +38,7 @@ app.post("/api/register", async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        profilePicture: profilePictureBase64,
+        profilePicture: profilePictureBuffer, // Armazenar como BLOB
       },
     });
 
@@ -55,7 +64,9 @@ app.post("/api/login", async (req: Request, res: Response) => {
         token,
         name: user.name,
         userId: user.id,
-        profilePicture: user.profilePicture,
+        profilePicture: user.profilePicture
+          ? bufferToBase64(user.profilePicture)
+          : undefined,
       });
     } else {
       res.status(401).send("Credenciais inválidas");
