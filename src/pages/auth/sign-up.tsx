@@ -24,6 +24,12 @@ const SignUp = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validation
+    if (!name || !email || !password || !profilePicture) {
+      console.error('Todos os campos são obrigatórios');
+      return;
+    }
+
     const formData = {
       name,
       email,
@@ -61,6 +67,7 @@ const SignUp = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
+            required
           />
         </div>
         <div className="mb-4">
@@ -70,6 +77,7 @@ const SignUp = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
+            required
           />
         </div>
         <div className="mb-4">
@@ -79,6 +87,7 @@ const SignUp = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
+            required
           />
         </div>
         <div className="mb-4">
@@ -86,6 +95,7 @@ const SignUp = () => {
             type="file"
             onChange={handleFileChange}
             className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white"
+            required
           />
         </div>
         <button type="submit" className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Cadastrar</button>
