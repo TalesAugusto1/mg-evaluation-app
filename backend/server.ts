@@ -2,40 +2,44 @@ import express, { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cors from "cors";
-import multer from "multer";
+
 import { PrismaClient } from "@prisma/client";
 
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
 app.use(cors());
 
-const upload = multer();
+app.post("/api/register", async (req, res) => {
+  try {
+    const { name, email, password, profilePicture } = req.body;
+    let profilePictureBase64 = null;
 
-// Register user
-app.post(
-  "/api/register",
-  upload.single("profilePicture"),
-  async (req: Request, res: Response) => {
-    const { name, email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const profilePicture = req.file ? req.file.buffer : undefined;
-
-    try {
-      const user = await prisma.user.create({
-        data: { name, email, password: hashedPassword, profilePicture },
-      });
-      console.log(user);
-      res.status(201).send("Usuário registrado com sucesso");
-    } catch (error) {
-      console.error("Erro ao registrar usuário:", error);
-      res.status(500).send("Erro interno do servidor");
+    if (profilePicture) {
+      profilePictureBase64 = profilePicture;
     }
-  }
-);
 
-// Login user
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        profilePicture: profilePictureBase64,
+      },
+    });
+
+    res.status(201).json(user);
+  } catch (error) {
+    console.error("Erro ao registrar usuário:", error);
+    res.status(500).json({ error: "Erro ao registrar usuário" });
+  }
+});
+
 app.post("/api/login", async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -47,7 +51,12 @@ app.post("/api/login", async (req: Request, res: Response) => {
         expiresIn: "1h",
       });
 
-      res.json({ token, name: user.name, userId: user.id });
+      res.json({
+        token,
+        name: user.name,
+        userId: user.id,
+        profilePicture: user.profilePicture,
+      });
     } else {
       res.status(401).send("Credenciais inválidas");
     }
@@ -57,13 +66,16 @@ app.post("/api/login", async (req: Request, res: Response) => {
   }
 });
 
-// Create project
 app.post("/api/projects", async (req: Request, res: Response) => {
   const { name, description, userId } = req.body;
 
+  if (!userId) {
+    return res.status(400).json({ error: "userId é necessário" });
+  }
+
   try {
     const user = await prisma.user.findUnique({
-      where: { id: Number(userId) },
+      where: { id: userId },
     });
 
     if (!user) {
@@ -71,7 +83,7 @@ app.post("/api/projects", async (req: Request, res: Response) => {
     }
 
     const project = await prisma.project.create({
-      data: { name, description, userId: Number(userId) },
+      data: { name, description, userId },
     });
 
     res.status(201).json(project);
@@ -81,9 +93,8 @@ app.post("/api/projects", async (req: Request, res: Response) => {
   }
 });
 
-// Get all projects for a specific user
 app.get("/api/projects", async (req: Request, res: Response) => {
-  const userId = Number(req.query.userId);
+  const userId = req.query.userId as string;
 
   if (!userId) {
     return res.status(400).json({ error: "userId é necessário" });
@@ -91,7 +102,7 @@ app.get("/api/projects", async (req: Request, res: Response) => {
 
   try {
     const projects = await prisma.project.findMany({
-      where: { userId: userId },
+      where: { userId },
     });
     res.json(projects);
   } catch (error) {
@@ -100,13 +111,12 @@ app.get("/api/projects", async (req: Request, res: Response) => {
   }
 });
 
-// Get project by ID
 app.get("/api/projects/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
     const project = await prisma.project.findUnique({
-      where: { id: Number(id) },
+      where: { id },
     });
     if (project) {
       res.json(project);
@@ -119,14 +129,13 @@ app.get("/api/projects/:id", async (req: Request, res: Response) => {
   }
 });
 
-// Update project
 app.put("/api/projects/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, description } = req.body;
 
   try {
     const project = await prisma.project.update({
-      where: { id: Number(id) },
+      where: { id },
       data: { name, description },
     });
     res.json(project);
@@ -136,13 +145,12 @@ app.put("/api/projects/:id", async (req: Request, res: Response) => {
   }
 });
 
-// Delete project
 app.delete("/api/projects/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
     await prisma.project.delete({
-      where: { id: Number(id) },
+      where: { id },
     });
     res.status(204).send();
   } catch (error) {
@@ -151,7 +159,6 @@ app.delete("/api/projects/:id", async (req: Request, res: Response) => {
   }
 });
 
-// Start the server
 app.listen(3001, () => {
   console.log("Servidor rodando na porta 3001");
 });

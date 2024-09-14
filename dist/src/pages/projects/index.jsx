@@ -74,7 +74,6 @@ var Projects = function () {
     var _a = (0, react_1.useState)([]), projects = _a[0], setProjects = _a[1];
     var _b = (0, react_1.useState)(''), name = _b[0], setName = _b[1];
     var _c = (0, react_1.useState)(''), description = _c[0], setDescription = _c[1];
-    // Modificação no useEffect para incluir o userId
     (0, react_1.useEffect)(function () {
         var userId = localStorage.getItem("userId");
         if (!userId) {
@@ -83,7 +82,16 @@ var Projects = function () {
         }
         fetch("http://localhost:3001/api/projects?userId=".concat(userId))
             .then(function (response) { return response.json(); })
-            .then(function (data) { return setProjects(data); });
+            .then(function (data) {
+            console.log(data); // Adicione este log para verificar a resposta da API
+            if (Array.isArray(data)) {
+                setProjects(data);
+            }
+            else {
+                console.error("A resposta da API não é um array:", data);
+            }
+        })
+            .catch(function (error) { return console.error("Erro ao buscar projetos:", error); });
     }, []);
     var handleCreate = function (e) { return __awaiter(void 0, void 0, void 0, function () {
         var userId, response, newProject;
@@ -129,10 +137,10 @@ var Projects = function () {
         <button type="submit" className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Criar Projeto</button>
       </form>
       <div className="w-full max-w-2xl">
-        {projects.map(function (project) { return (<div key={project.id} className="bg-gray-800 p-4 rounded shadow-md mb-4">
-            <h2 className="text-2xl font-bold">{project.name}</h2>
-            <p>{project.description}</p>
-          </div>); })}
+        {Array.isArray(projects) ? (projects.map(function (project) { return (<div key={project.id} className="bg-gray-800 p-4 rounded shadow-md mb-4">
+              <h2 className="text-2xl font-bold">{project.name}</h2>
+              <p>{project.description}</p>
+            </div>); })) : (<p>Nenhum projeto encontrado.</p>)}
       </div>
     </div>);
 };

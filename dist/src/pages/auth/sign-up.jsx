@@ -59,24 +59,37 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importStar(require("react"));
 var navigation_1 = require("next/navigation");
-var link_1 = __importDefault(require("next/link"));
 var SignUp = function () {
     var _a = (0, react_1.useState)(''), name = _a[0], setName = _a[1];
     var _b = (0, react_1.useState)(''), email = _b[0], setEmail = _b[1];
     var _c = (0, react_1.useState)(''), password = _c[0], setPassword = _c[1];
+    var _d = (0, react_1.useState)(null), profilePicture = _d[0], setProfilePicture = _d[1];
     var router = (0, navigation_1.useRouter)();
+    var handleFileChange = function (e) {
+        var file = e.target.files ? e.target.files[0] : null;
+        if (file) {
+            var reader_1 = new FileReader();
+            reader_1.onloadend = function () {
+                setProfilePicture(reader_1.result);
+            };
+            reader_1.readAsDataURL(file);
+        }
+    };
     var handleSubmit = function (e) { return __awaiter(void 0, void 0, void 0, function () {
-        var response, error_1;
+        var formData, response, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     e.preventDefault();
+                    formData = {
+                        name: name,
+                        email: email,
+                        password: password,
+                        profilePicture: profilePicture,
+                    };
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
@@ -85,27 +98,27 @@ var SignUp = function () {
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ name: name, email: email, password: password }),
+                            body: JSON.stringify(formData),
                         })];
                 case 2:
                     response = _a.sent();
                     if (response.ok) {
-                        router.push('/auth/login'); // Redirecionar para a página de login após o cadastro
+                        router.push('/auth/login');
                     }
                     else {
-                        console.error('Registration failed');
+                        console.error('Cadastro falhou');
                     }
                     return [3 /*break*/, 4];
                 case 3:
                     error_1 = _a.sent();
-                    console.error('Failed to fetch:', error_1);
+                    console.error('Erro ao cadastrar:', error_1);
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];
             }
         });
     }); };
     return (<div className="min-h-screen flex flex-col items-center justify-center bg-black text-white">
-      <h1 className="text-4xl font-bold mb-8">Cadastro</h1>
+      <h1 className="text-4xl font-bold mb-8">Cadastrar</h1>
       <form onSubmit={handleSubmit} className="bg-gray-800 p-6 rounded shadow-md w-full max-w-sm">
         <div className="mb-4">
           <input type="text" placeholder="Nome" value={name} onChange={function (e) { return setName(e.target.value); }} className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"/>
@@ -116,9 +129,11 @@ var SignUp = function () {
         <div className="mb-4">
           <input type="password" placeholder="Senha" value={password} onChange={function (e) { return setPassword(e.target.value); }} className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"/>
         </div>
+        <div className="mb-4">
+          <input type="file" onChange={handleFileChange} className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white"/>
+        </div>
         <button type="submit" className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Cadastrar</button>
       </form>
-      <p className="mt-4">Já tem uma conta? <link_1.default href="/auth/login" className="text-blue-500 hover:underline">Entrar</link_1.default></p>
     </div>);
 };
 exports.default = SignUp;

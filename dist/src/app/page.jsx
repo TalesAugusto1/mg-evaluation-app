@@ -36,7 +36,9 @@ var Home = function () {
     var _a = (0, authContext_1.useAuth)(), isAuthenticated = _a.isAuthenticated, userId = _a.userId;
     var _b = (0, react_1.useState)([]), projects = _b[0], setProjects = _b[1];
     (0, react_1.useEffect)(function () {
-        if (isAuthenticated) {
+        console.log('Home - isAuthenticated:', isAuthenticated);
+        console.log('Home - userId:', userId);
+        if (isAuthenticated && userId) {
             fetch("http://localhost:3001/api/projects?userId=".concat(userId))
                 .then(function (response) { return response.json(); })
                 .then(function (data) {
@@ -74,7 +76,7 @@ var Home = function () {
               </link_1.default>
             </div>
           </div>) : (<div className="text-center">
-            {/* Place any additional content for logged-in users here */}
+            
           </div>)}
       </MainContent_1.default>
     </div>);

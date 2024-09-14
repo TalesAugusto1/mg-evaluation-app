@@ -43,45 +43,47 @@ var express_1 = __importDefault(require("express"));
 var bcryptjs_1 = __importDefault(require("bcryptjs"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var cors_1 = __importDefault(require("cors"));
-var multer_1 = __importDefault(require("multer"));
 var client_1 = require("@prisma/client");
 var app = (0, express_1.default)();
 var prisma = new client_1.PrismaClient();
-app.use(express_1.default.json());
+app.use(express_1.default.json({ limit: "50mb" }));
+app.use(express_1.default.urlencoded({ limit: "50mb", extended: true }));
 app.use((0, cors_1.default)());
-var upload = (0, multer_1.default)();
-// Register user
-app.post("/api/register", upload.single("profilePicture"), function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, name, email, password, hashedPassword, profilePicture, user, error_1;
+app.post("/api/register", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, name_1, email, password, profilePicture, profilePictureBase64, hashedPassword, user, error_1;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _a = req.body, name = _a.name, email = _a.email, password = _a.password;
+                _b.trys.push([0, 3, , 4]);
+                _a = req.body, name_1 = _a.name, email = _a.email, password = _a.password, profilePicture = _a.profilePicture;
+                profilePictureBase64 = null;
+                if (profilePicture) {
+                    profilePictureBase64 = profilePicture; // já é uma string base64
+                }
                 return [4 /*yield*/, bcryptjs_1.default.hash(password, 10)];
             case 1:
                 hashedPassword = _b.sent();
-                profilePicture = req.file ? req.file.buffer : undefined;
-                _b.label = 2;
-            case 2:
-                _b.trys.push([2, 4, , 5]);
                 return [4 /*yield*/, prisma.user.create({
-                        data: { name: name, email: email, password: hashedPassword, profilePicture: profilePicture },
+                        data: {
+                            name: name_1,
+                            email: email,
+                            password: hashedPassword,
+                            profilePicture: profilePictureBase64,
+                        },
                     })];
-            case 3:
+            case 2:
                 user = _b.sent();
-                console.log(user);
-                res.status(201).send("Usuário registrado com sucesso");
-                return [3 /*break*/, 5];
-            case 4:
+                res.status(201).json(user);
+                return [3 /*break*/, 4];
+            case 3:
                 error_1 = _b.sent();
                 console.error("Erro ao registrar usuário:", error_1);
-                res.status(500).send("Erro interno do servidor");
-                return [3 /*break*/, 5];
-            case 5: return [2 /*return*/];
+                res.status(500).json({ error: "Erro ao registrar usuário" });
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); });
-// Login user
 app.post("/api/login", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, email, password, user, _b, token, error_2;
     return __generator(this, function (_c) {
@@ -105,7 +107,12 @@ app.post("/api/login", function (req, res) { return __awaiter(void 0, void 0, vo
                     token = jsonwebtoken_1.default.sign({ email: user.email }, "secreta", {
                         expiresIn: "1h",
                     });
-                    res.json({ token: token, name: user.name, userId: user.id });
+                    res.json({
+                        token: token,
+                        name: user.name,
+                        userId: user.id,
+                        profilePicture: user.profilePicture,
+                    });
                 }
                 else {
                     res.status(401).send("Credenciais inválidas");
@@ -120,18 +127,20 @@ app.post("/api/login", function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); });
-// Create project
 app.post("/api/projects", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, name, description, userId, user, project, error_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 _a = req.body, name = _a.name, description = _a.description, userId = _a.userId;
+                if (!userId) {
+                    return [2 /*return*/, res.status(400).json({ error: "userId é necessário" })];
+                }
                 _b.label = 1;
             case 1:
                 _b.trys.push([1, 4, , 5]);
                 return [4 /*yield*/, prisma.user.findUnique({
-                        where: { id: Number(userId) },
+                        where: { id: userId }, // userId deve ser uma string
                     })];
             case 2:
                 user = _b.sent();
@@ -139,7 +148,7 @@ app.post("/api/projects", function (req, res) { return __awaiter(void 0, void 0,
                     return [2 /*return*/, res.status(400).json({ error: "Usuário não encontrado" })];
                 }
                 return [4 /*yield*/, prisma.project.create({
-                        data: { name: name, description: description, userId: Number(userId) },
+                        data: { name: name, description: description, userId: userId },
                     })];
             case 3:
                 project = _b.sent();
@@ -154,13 +163,12 @@ app.post("/api/projects", function (req, res) { return __awaiter(void 0, void 0,
         }
     });
 }); });
-// Get all projects for a specific user
 app.get("/api/projects", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var userId, projects, error_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                userId = Number(req.query.userId);
+                userId = req.query.userId;
                 if (!userId) {
                     return [2 /*return*/, res.status(400).json({ error: "userId é necessário" })];
                 }
@@ -183,7 +191,6 @@ app.get("/api/projects", function (req, res) { return __awaiter(void 0, void 0, 
         }
     });
 }); });
-// Get project by ID
 app.get("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, project, error_5;
     return __generator(this, function (_a) {
@@ -194,7 +201,7 @@ app.get("/api/projects/:id", function (req, res) { return __awaiter(void 0, void
             case 1:
                 _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma.project.findUnique({
-                        where: { id: Number(id) },
+                        where: { id: id },
                     })];
             case 2:
                 project = _a.sent();
@@ -214,7 +221,6 @@ app.get("/api/projects/:id", function (req, res) { return __awaiter(void 0, void
         }
     });
 }); });
-// Update project
 app.put("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, _a, name, description, project, error_6;
     return __generator(this, function (_b) {
@@ -226,7 +232,7 @@ app.put("/api/projects/:id", function (req, res) { return __awaiter(void 0, void
             case 1:
                 _b.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma.project.update({
-                        where: { id: Number(id) },
+                        where: { id: id },
                         data: { name: name, description: description },
                     })];
             case 2:
@@ -242,7 +248,6 @@ app.put("/api/projects/:id", function (req, res) { return __awaiter(void 0, void
         }
     });
 }); });
-// Delete project
 app.delete("/api/projects/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, error_7;
     return __generator(this, function (_a) {
@@ -253,7 +258,7 @@ app.delete("/api/projects/:id", function (req, res) { return __awaiter(void 0, v
             case 1:
                 _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, prisma.project.delete({
-                        where: { id: Number(id) },
+                        where: { id: id },
                     })];
             case 2:
                 _a.sent();
@@ -268,7 +273,6 @@ app.delete("/api/projects/:id", function (req, res) { return __awaiter(void 0, v
         }
     });
 }); });
-// Start the server
 app.listen(3001, function () {
     console.log("Servidor rodando na porta 3001");
 });

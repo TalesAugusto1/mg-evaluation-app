@@ -33,14 +33,34 @@ var AuthProvider = function (_a) {
     var _c = (0, react_1.useState)(undefined), userId = _c[0], setUserId = _c[1];
     var _d = (0, react_1.useState)(undefined), token = _d[0], setToken = _d[1];
     var _e = (0, react_1.useState)(undefined), name = _e[0], setName = _e[1];
-    var login = function (token, name, userId) {
+    var _f = (0, react_1.useState)(undefined), profilePicture = _f[0], setProfilePicture = _f[1]; // Adicionado
+    (0, react_1.useEffect)(function () {
+        // Verificar e recuperar os dados do localStorage ao iniciar
+        var storedToken = localStorage.getItem('token');
+        var storedName = localStorage.getItem('name');
+        var storedUserId = localStorage.getItem('userId');
+        var storedProfilePicture = localStorage.getItem('profilePicture'); // Adicionado
+        if (storedToken && storedName && storedUserId) {
+            setIsAuthenticated(true);
+            setToken(storedToken);
+            setName(storedName);
+            setUserId(storedUserId);
+            setProfilePicture(storedProfilePicture || undefined); // Adicionado
+        }
+    }, []);
+    var login = function (token, name, userId, profilePicture) {
+        console.log('Login called with:', { token: token, name: name, userId: userId, profilePicture: profilePicture });
         setIsAuthenticated(true);
         setToken(token);
         setName(name);
         setUserId(userId);
+        setProfilePicture(profilePicture);
         localStorage.setItem('token', token);
         localStorage.setItem('name', name);
         localStorage.setItem('userId', userId);
+        if (profilePicture) {
+            localStorage.setItem('profilePicture', profilePicture);
+        }
     };
     var logout = function () {
         console.log('Logging out...');
@@ -48,11 +68,13 @@ var AuthProvider = function (_a) {
         setToken(undefined);
         setName(undefined);
         setUserId(undefined);
+        setProfilePicture(undefined);
         localStorage.removeItem('token');
         localStorage.removeItem('name');
         localStorage.removeItem('userId');
+        localStorage.removeItem('profilePicture');
     };
-    return (<AuthContext.Provider value={{ isAuthenticated: isAuthenticated, userId: userId, token: token, name: name, login: login, logout: logout }}>
+    return (<AuthContext.Provider value={{ isAuthenticated: isAuthenticated, userId: userId, token: token, name: name, profilePicture: profilePicture, login: login, logout: logout }}>
       {children}
     </AuthContext.Provider>);
 };

@@ -18,7 +18,15 @@ const Projects = () => {
 
     fetch(`http://localhost:3001/api/projects?userId=${userId}`)
       .then(response => response.json())
-      .then(data => setProjects(data));
+      .then(data => {
+        console.log(data); // Adicione este log para verificar a resposta da API
+        if (Array.isArray(data)) {
+          setProjects(data);
+        } else {
+          console.error("A resposta da API não é um array:", data);
+        }
+      })
+      .catch(error => console.error("Erro ao buscar projetos:", error));
   }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -72,12 +80,16 @@ const Projects = () => {
         <button type="submit" className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Criar Projeto</button>
       </form>
       <div className="w-full max-w-2xl">
-        {projects.map((project) => (
-          <div key={project.id} className="bg-gray-800 p-4 rounded shadow-md mb-4">
-            <h2 className="text-2xl font-bold">{project.name}</h2>
-            <p>{project.description}</p>
-          </div>
-        ))}
+        {Array.isArray(projects) ? (
+          projects.map((project) => (
+            <div key={project.id} className="bg-gray-800 p-4 rounded shadow-md mb-4">
+              <h2 className="text-2xl font-bold">{project.name}</h2>
+              <p>{project.description}</p>
+            </div>
+          ))
+        ) : (
+          <p>Nenhum projeto encontrado.</p>
+        )}
       </div>
     </div>
   );

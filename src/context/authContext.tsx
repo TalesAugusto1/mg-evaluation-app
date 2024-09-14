@@ -7,7 +7,8 @@ export interface AuthContextType {
   userId?: string;
   token?: string;
   name?: string;
-  login: (token: string, name: string, userId: string) => void;
+  profilePicture?: string;
+  login: (token: string, name: string, userId: string, profilePicture?: string) => void;
   logout: () => void;
 }
 
@@ -18,30 +19,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [token, setToken] = useState<string | undefined>(undefined);
   const [name, setName] = useState<string | undefined>(undefined);
+  const [profilePicture, setProfilePicture] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     // Verificar e recuperar os dados do localStorage ao iniciar
     const storedToken = localStorage.getItem('token');
     const storedName = localStorage.getItem('name');
     const storedUserId = localStorage.getItem('userId');
+    const storedProfilePicture = localStorage.getItem('profilePicture');
 
     if (storedToken && storedName && storedUserId) {
       setIsAuthenticated(true);
       setToken(storedToken);
       setName(storedName);
       setUserId(storedUserId);
+      setProfilePicture(storedProfilePicture || undefined);
     }
   }, []);
 
-  const login = (token: string, name: string, userId: string) => {
-    console.log('Login called with:', { token, name, userId });
+  const login = (token: string, name: string, userId: string, profilePicture?: string) => {
+    console.log('Login called with:', { token, name, userId, profilePicture });
     setIsAuthenticated(true);
     setToken(token);
     setName(name);
     setUserId(userId);
+    setProfilePicture(profilePicture);
     localStorage.setItem('token', token);
     localStorage.setItem('name', name);
     localStorage.setItem('userId', userId);
+    if (profilePicture) {
+      localStorage.setItem('profilePicture', profilePicture); 
+    }
   };
 
   const logout = () => {
@@ -50,13 +58,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setToken(undefined);
     setName(undefined);
     setUserId(undefined);
+    setProfilePicture(undefined); 
     localStorage.removeItem('token');
     localStorage.removeItem('name');
     localStorage.removeItem('userId');
+    localStorage.removeItem('profilePicture'); 
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userId, token, name, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, userId, token, name, profilePicture, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

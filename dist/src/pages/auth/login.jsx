@@ -94,16 +94,17 @@ var Login = function () {
                     return [4 /*yield*/, response.json()];
                 case 3:
                     _a = _b.sent(), token = _a.token, name_1 = _a.name, userId = _a.userId;
+                    console.log('Login successful:', { token: token, name: name_1, userId: userId });
                     login(token, name_1, userId);
                     router.push('/');
                     return [3 /*break*/, 5];
                 case 4:
-                    console.error('Login falhou');
+                    console.error('Login failed');
                     _b.label = 5;
                 case 5: return [3 /*break*/, 7];
                 case 6:
                     error_1 = _b.sent();
-                    console.error('Erro ao fazer login:', error_1);
+                    console.error('Error during login:', error_1);
                     return [3 /*break*/, 7];
                 case 7: return [2 /*return*/];
             }
