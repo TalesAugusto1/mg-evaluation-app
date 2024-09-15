@@ -2,17 +2,21 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { FaHome, FaProjectDiagram, FaUser } from 'react-icons/fa';
+import { useAuth } from '@/context/authContext';
 import { Project } from '@/types/project';
-import { FaHome, FaProjectDiagram, FaUser } from 'react-icons/fa'; // Importa ícones da biblioteca React Icons
 
 interface NavBarProps {
   projects: Project[];
-  userId: string;
-  userName: string;
-  profilePicture?: string;
 }
 
-const NavBar: React.FC<NavBarProps> = ({ projects, userId }) => {
+const NavBar: React.FC<NavBarProps> = ({ projects }) => {
+  const { isAuthenticated, userId } = useAuth();
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <nav className="w-64 bg-gray-800 text-white p-4 flex flex-col h-screen">
       {/* Seção de Projetos */}

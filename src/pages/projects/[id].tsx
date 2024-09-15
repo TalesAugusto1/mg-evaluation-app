@@ -4,6 +4,8 @@ import { Project } from '@/types/project';
 import { Task } from '@/types/task';
 import { AiOutlineDelete, AiOutlineEdit, AiOutlinePlus, AiOutlineClose } from 'react-icons/ai'; 
 import Link from 'next/link';
+// import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
 
 const ProjectDetails = () => {
   const router = useRouter();
@@ -72,7 +74,7 @@ const ProjectDetails = () => {
           const addedTask = await response.json();
           setTasks([...tasks, addedTask]);
           setNewTask({ name: '', description: '', status: 'todo', dueDate: '', assignedUserId: '' });
-          setShowNewTaskForm(false); // Hide the form after adding the task
+          setShowNewTaskForm(false);
         } else {
           console.error('Failed to add task');
         }
@@ -323,7 +325,8 @@ const ProjectDetails = () => {
           <div key={task.id} className="bg-gray-700 p-4 mb-4 rounded-lg">
             <h4 className="text-lg font-semibold">{task.name}</h4>
             <p>{task.description}</p>
-            <p className="text-gray-400">Due: {task.dueDate}</p>
+            <p className="text-gray-400">Due: {new Date(task.dueDate).toLocaleDateString()}</p>
+
             <p className="text-gray-400">Assigned: {users.find(user => user.id === task.assignedUserId)?.name || 'Unassigned'}</p>
             <div className="flex space-x-2 mt-2">
               <button
@@ -362,7 +365,8 @@ const ProjectDetails = () => {
           <tr key={task.id}>
             <td className="px-4 py-2 border">{task.name}</td>
             <td className="px-4 py-2 border">{task.description}</td>
-            <td className="px-4 py-2 border">{task.dueDate}</td>
+            <td className="px-4 py-2 border">{new Date(task.dueDate).toLocaleDateString()}</td>
+
             <td className="px-4 py-2 border">{task.status}</td>
             <td className="px-4 py-2 border">
               {users.find(user => user.id === task.assignedUserId)?.name || 'Unassigned'}

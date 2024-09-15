@@ -24,8 +24,7 @@ const SignUp = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validation
+ 
     if (!name || !email || !password || !profilePicture) {
       console.error('Todos os campos são obrigatórios');
       return;

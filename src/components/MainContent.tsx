@@ -3,7 +3,7 @@ import { useAuth } from '@/context/authContext';
 import { Project } from '@/types/project';
 import Link from 'next/link';
 import Image from 'next/image';
-import { AiOutlineLogout } from 'react-icons/ai'; // Ícone de logout
+import { AiOutlineLogout } from 'react-icons/ai'; 
 
 interface MainContentProps {
   children: React.ReactNode;
@@ -14,23 +14,23 @@ const MainContent: React.FC<MainContentProps> = ({ children, projects }) => {
   const { name, profilePicture, logout } = useAuth();
 
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [fadeOut, setFadeOut] = useState(false); // Controle de fade out
+  const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
     if (projects.length > 0) {
-      // Exibe a mensagem de sucesso por 5 segundos
+
       setShowSuccessMessage(true);
-      setFadeOut(false); // Inicia sem fade out
+      setFadeOut(false);
 
       const timer = setTimeout(() => {
-        setFadeOut(true); // Inicia o fade out após 3,5 segundos
+        setFadeOut(true);
       }, 3000);
 
       const hideTimer = setTimeout(() => {
-        setShowSuccessMessage(false); // Remove a mensagem após o fade
-      }, 10000); // 1,5 segundos de fade
+        setShowSuccessMessage(false); 
+      }, 10000); 
 
-      // Limpar o temporizador ao desmontar
+
       return () => {
         clearTimeout(timer);
         clearTimeout(hideTimer);
@@ -40,14 +40,14 @@ const MainContent: React.FC<MainContentProps> = ({ children, projects }) => {
 
   return (
     <div className="flex-1 flex flex-col bg-black text-white relative min-h-screen">
-      {/* Cabeçalho */}
+
       <div className="flex justify-between items-center w-full p-4 bg-gray-900">
-        {/* Texto "Bem-vindo" à esquerda */}
+
         <div className="flex-1">
           {name && <div className="text-xl font-semibold">Bem-vindo, {name}!</div>}
         </div>
 
-        {/* Foto e botão de logout à direita */}
+
         <div className="flex items-center space-x-4">
           {profilePicture ? (
             <div className="w-12 h-12 rounded-full overflow-hidden">
@@ -75,7 +75,6 @@ const MainContent: React.FC<MainContentProps> = ({ children, projects }) => {
         </div>
       </div>
 
-      {/* Mensagem de sucesso de carregamento com fade out */}
       {showSuccessMessage && (
         <div
           className={`fixed top-0 left-0 right-0 bg-green-500 text-white text-center py-2 z-50 transition-opacity duration-1500 ease-in-out ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
@@ -84,7 +83,6 @@ const MainContent: React.FC<MainContentProps> = ({ children, projects }) => {
         </div>
       )}
 
-      {/* Conteúdo principal */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         {projects.length === 0 ? (
           <div className="text-center">
