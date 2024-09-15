@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const SignUp = () => {
   const [name, setName] = useState('');
@@ -100,6 +101,7 @@ const SignUp = () => {
         </div>
         <button type="submit" className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Cadastrar</button>
       </form>
+      <p className="mt-4">Já tem uma conta? <Link href="/auth/sign-up" className="text-blue-500 hover:underline">Entrar</Link></p>
     </div>
   );
 };

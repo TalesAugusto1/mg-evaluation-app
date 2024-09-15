@@ -210,14 +210,15 @@ app.delete("/api/projects/:id", async (req: Request, res: Response) => {
 // Criar tarefa
 app.post("/api/projects/:projectId/tasks", async (req, res) => {
   const { projectId } = req.params;
-  const { name, description, userId, status, dueDate } = req.body;
+  const { name, description, assignedUserId, status, dueDate } = req.body;
 
   try {
     const newTask = await prisma.task.create({
       data: {
         name,
         description,
-        userId,
+        userId: assignedUserId,
+        assignedUserId: assignedUserId,
         projectId,
         status,
         dueDate: new Date(dueDate),
@@ -225,14 +226,20 @@ app.post("/api/projects/:projectId/tasks", async (req, res) => {
     });
     res.json(newTask);
   } catch (error) {
+    console.error("Erro ao criar tarefa:", error);
     res.status(500).json({ error: "Failed to create task" });
   }
 });
 
 // Editar tarefa
-app.put("/api/tasks/:taskId", async (req, res) => {
+app.put("/api/tasks/:taskId", async (req: Request, res: Response) => {
   const { taskId } = req.params;
   const { name, description, status, dueDate } = req.body;
+
+  // Validação básica dos dados recebidos
+  if (!name || !status || !dueDate) {
+    return res.status(400).json({ error: "Todos os campos são necessários" });
+  }
 
   try {
     const updatedTask = await prisma.task.update({
@@ -246,6 +253,7 @@ app.put("/api/tasks/:taskId", async (req, res) => {
     });
     res.json(updatedTask);
   } catch (error) {
+    console.error("Erro ao atualizar tarefa:", error);
     res.status(500).json({ error: "Failed to update task" });
   }
 });

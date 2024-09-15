@@ -337,12 +337,12 @@ app.delete("/api/projects/:id", function (req, res) { return __awaiter(void 0, v
 }); });
 // Criar tarefa
 app.post("/api/projects/:projectId/tasks", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var projectId, _a, name, description, userId, status, dueDate, newTask, error_8;
+    var projectId, _a, name, description, assignedUserId, status, dueDate, newTask, error_8;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 projectId = req.params.projectId;
-                _a = req.body, name = _a.name, description = _a.description, userId = _a.userId, status = _a.status, dueDate = _a.dueDate;
+                _a = req.body, name = _a.name, description = _a.description, assignedUserId = _a.assignedUserId, status = _a.status, dueDate = _a.dueDate;
                 _b.label = 1;
             case 1:
                 _b.trys.push([1, 3, , 4]);
@@ -350,7 +350,8 @@ app.post("/api/projects/:projectId/tasks", function (req, res) { return __awaite
                         data: {
                             name: name,
                             description: description,
-                            userId: userId,
+                            userId: assignedUserId,
+                            assignedUserId: assignedUserId,
                             projectId: projectId,
                             status: status,
                             dueDate: new Date(dueDate),
@@ -362,6 +363,7 @@ app.post("/api/projects/:projectId/tasks", function (req, res) { return __awaite
                 return [3 /*break*/, 4];
             case 3:
                 error_8 = _b.sent();
+                console.error("Erro ao criar tarefa:", error_8);
                 res.status(500).json({ error: "Failed to create task" });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
@@ -376,6 +378,10 @@ app.put("/api/tasks/:taskId", function (req, res) { return __awaiter(void 0, voi
             case 0:
                 taskId = req.params.taskId;
                 _a = req.body, name = _a.name, description = _a.description, status = _a.status, dueDate = _a.dueDate;
+                // Validação básica dos dados recebidos
+                if (!name || !status || !dueDate) {
+                    return [2 /*return*/, res.status(400).json({ error: "Todos os campos são necessários" })];
+                }
                 _b.label = 1;
             case 1:
                 _b.trys.push([1, 3, , 4]);
@@ -394,6 +400,7 @@ app.put("/api/tasks/:taskId", function (req, res) { return __awaiter(void 0, voi
                 return [3 /*break*/, 4];
             case 3:
                 error_9 = _b.sent();
+                console.error("Erro ao atualizar tarefa:", error_9);
                 res.status(500).json({ error: "Failed to update task" });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];

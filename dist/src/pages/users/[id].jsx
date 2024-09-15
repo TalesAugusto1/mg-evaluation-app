@@ -47,7 +47,6 @@ var UserPage = function (_a) {
       <UserProfile_1.default userId={userId}/>
     </div>);
 };
-// Função para obter o ID do usuário da URL e passá-lo como props para o componente
 var getServerSideProps = function (context) { return __awaiter(void 0, void 0, void 0, function () {
     var id;
     return __generator(this, function (_a) {

@@ -1,5 +1,4 @@
 "use strict";
-"use client";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -85,11 +84,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importStar(require("react"));
 var router_1 = require("next/router");
-var authContext_1 = require("@/context/authContext");
+// import { useAuth } from '@/context/authContext';
 var ai_1 = require("react-icons/ai");
 var link_1 = __importDefault(require("next/link"));
 var ProjectDetails = function () {
-    var userId = (0, authContext_1.useAuth)().userId;
+    // const { userId } = useAuth();
     var router = (0, router_1.useRouter)();
     var id = router.query.id;
     var _a = (0, react_1.useState)(null), project = _a[0], setProject = _a[1];
@@ -97,15 +96,15 @@ var ProjectDetails = function () {
     var _c = (0, react_1.useState)({
         name: '',
         description: '',
-        status: 'todo', // Default status
-        dueDate: '', // Initialize as an empty string
-        assignedUserId: '' // Initialize as an empty string
+        status: 'todo',
+        dueDate: '',
+        assignedUserId: ''
     }), newTask = _c[0], setNewTask = _c[1];
     var _d = (0, react_1.useState)(null), editingTask = _d[0], setEditingTask = _d[1];
     var _e = (0, react_1.useState)(null), editingProject = _e[0], setEditingProject = _e[1];
     var _f = (0, react_1.useState)(true), loading = _f[0], setLoading = _f[1];
     var _g = (0, react_1.useState)(null), error = _g[0], setError = _g[1];
-    var _h = (0, react_1.useState)([]), users = _h[0], setUsers = _h[1]; // List of users
+    var _h = (0, react_1.useState)([]), users = _h[0], setUsers = _h[1];
     (0, react_1.useEffect)(function () {
         if (id) {
             setLoading(true);
@@ -114,18 +113,18 @@ var ProjectDetails = function () {
             fetch("http://localhost:3001/api/projects/".concat(id))
                 .then(function (response) { return response.json(); })
                 .then(function (data) { return setProject(data); })
-                .catch(function (err) { return setError('Failed to fetch project details' + err); })
+                .catch(function (err) { return setError('Failed to fetch project details: ' + err); })
                 .finally(function () { return setLoading(false); });
             // Fetch tasks for the project
             fetch("http://localhost:3001/api/projects/".concat(id, "/tasks"))
                 .then(function (response) { return response.json(); })
                 .then(function (data) { return setTasks(data); })
-                .catch(function (err) { return setError('Failed to fetch tasks' + err); });
+                .catch(function (err) { return setError('Failed to fetch tasks: ' + err); });
             // Fetch users for task assignment
             fetch('http://localhost:3001/api/users')
                 .then(function (response) { return response.json(); })
                 .then(function (data) { return setUsers(data); })
-                .catch(function (err) { return setError('Failed to fetch users' + err); });
+                .catch(function (err) { return setError('Failed to fetch users: ' + err); });
         }
     }, [id]);
     var handleAddTask = function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -142,7 +141,7 @@ var ProjectDetails = function () {
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify(__assign(__assign({}, newTask), { projectId: id, userId: userId })),
+                            body: JSON.stringify(__assign(__assign({}, newTask), { projectId: id, assignedUserId: newTask.assignedUserId })),
                         })];
                 case 2:
                     response = _a.sent();
@@ -170,14 +169,14 @@ var ProjectDetails = function () {
         });
     }); };
     var handleEditTask = function () { return __awaiter(void 0, void 0, void 0, function () {
-        var response, updatedTask_1, error_2;
+        var response, updatedTask_1, errorData, error_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!editingTask) return [3 /*break*/, 8];
+                    if (!editingTask) return [3 /*break*/, 9];
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 6, , 7]);
+                    _a.trys.push([1, 7, , 8]);
                     return [4 /*yield*/, fetch("http://localhost:3001/api/tasks/".concat(editingTask.id), {
                             method: 'PUT',
                             headers: {
@@ -199,20 +198,22 @@ var ProjectDetails = function () {
                     updatedTask_1 = _a.sent();
                     setTasks(tasks.map(function (task) { return (task.id === updatedTask_1.id ? updatedTask_1 : task); }));
                     setEditingTask(null);
-                    return [3 /*break*/, 5];
-                case 4:
-                    console.error('Failed to edit task');
-                    _a.label = 5;
-                case 5: return [3 /*break*/, 7];
-                case 6:
+                    return [3 /*break*/, 6];
+                case 4: return [4 /*yield*/, response.json()];
+                case 5:
+                    errorData = _a.sent();
+                    console.error('Failed to edit task:', errorData.error);
+                    _a.label = 6;
+                case 6: return [3 /*break*/, 8];
+                case 7:
                     error_2 = _a.sent();
                     console.error('Error editing task:', error_2);
-                    return [3 /*break*/, 7];
-                case 7: return [3 /*break*/, 9];
-                case 8:
+                    return [3 /*break*/, 8];
+                case 8: return [3 /*break*/, 10];
+                case 9:
                     console.error('No task selected for editing');
-                    _a.label = 9;
-                case 9: return [2 /*return*/];
+                    _a.label = 10;
+                case 10: return [2 /*return*/];
             }
         });
     }); };
@@ -370,7 +371,7 @@ var ProjectDetails = function () {
                     <td className="px-4 py-2 border">{task.dueDate}</td>
                     <td className="px-4 py-2 border">{task.status}</td>
                     <td className="px-4 py-2 border">
-                      {((_a = users.find(function (user) { return user.id === task.assignedUserId; })) === null || _a === void 0 ? void 0 : _a.name) || 'Unassigned'}
+                        {((_a = users.find(function (user) { return user.id === task.assignedUserId; })) === null || _a === void 0 ? void 0 : _a.name) || 'Unassigned'}
                     </td>
                     <td className="px-4 py-2 border flex items-center">
                       <button onClick={function () { return handleTaskEditClick(task); }} className="text-yellow-500 hover:text-yellow-600">

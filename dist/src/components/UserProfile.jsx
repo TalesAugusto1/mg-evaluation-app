@@ -35,9 +35,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-// src/components/UserProfile.tsx
 var react_1 = require("react");
+var image_1 = __importDefault(require("next/image"));
+var link_1 = __importDefault(require("next/link"));
 var UserProfile = function (_a) {
     var userId = _a.userId;
     var _b = (0, react_1.useState)(null), user = _b[0], setUser = _b[1];
@@ -49,8 +53,8 @@ var UserProfile = function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, 4, 5]);
-                        console.log(userId);
-                        return [4 /*yield*/, fetch("/api/users/".concat(userId))];
+                        console.log('Fetching user with ID:', userId);
+                        return [4 /*yield*/, fetch("http://localhost:3001/api/users/".concat(userId))];
                     case 1:
                         response = _a.sent();
                         if (!response.ok) {
@@ -59,6 +63,7 @@ var UserProfile = function (_a) {
                         return [4 /*yield*/, response.json()];
                     case 2:
                         data = _a.sent();
+                        console.log('Fetched user data:', data);
                         setUser(data);
                         return [3 /*break*/, 5];
                     case 3:
@@ -75,17 +80,33 @@ var UserProfile = function (_a) {
         fetchUser();
     }, [userId]);
     if (loading)
-        return <p>Loading...</p>;
+        return <p className="text-center text-lg text-gray-400">Loading...</p>;
     if (!user)
-        return <p>Usuário não encontrado</p>;
-    return (<div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-3xl font-bold mb-4">{user.name}</h1>
-      {user.profilePicture && (<img src={user.profilePicture} alt={"".concat(user.name, "'s profile")} className="w-32 h-32 rounded-full object-cover mb-4"/>)}
-      <div>
-        <h2 className="text-2xl font-semibold mb-2">Task Statistics</h2>
-        <p className="mb-1"><strong>Todo:</strong> {user.taskStatistics.todo}</p>
-        <p className="mb-1"><strong>In Progress:</strong> {user.taskStatistics.inProgress}</p>
-        <p><strong>Done:</strong> {user.taskStatistics.done}</p>
+        return <p className="text-center text-lg text-gray-400">Usuário não encontrado</p>;
+    var profilePictureSrc = user.profilePicture
+        ? "data:".concat(user.profilePicture.type, ";base64,").concat(Buffer.from(user.profilePicture.data).toString('base64'))
+        : '';
+    return (<div className="min-h-screen flex flex-col items-center p-6 bg-gray-900 text-white">
+      <div className="max-w-3xl w-full bg-gray-800 shadow-md rounded-lg p-6">
+        <div className="flex flex-col items-center mb-6"> 
+          {user.profilePicture ? (<div className="relative w-24 h-24">
+              <image_1.default src={profilePictureSrc} alt={"".concat(user.name, "'s profile")} width={96} height={96} layout="fixed" className="rounded-full border-4 border-blue-600 object-cover"/>
+            </div>) : (<div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-gray-400">
+              No Image
+            </div>)}
+          <h1 className="text-4xl font-bold text-gray-100 mt-12">{user.name}</h1>
+        </div>
+        <div className="bg-gray-700 p-4 rounded-lg shadow-inner">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-300">Estatísticas de Tarefas</h2>
+          <p className="text-lg mb-2"><strong>Todo:</strong> {user.taskStatistics.todo}</p>
+          <p className="text-lg mb-2"><strong>Em Andamento:</strong> {user.taskStatistics.inProgress}</p>
+          <p className="text-lg"><strong>Concluídas:</strong> {user.taskStatistics.done}</p>
+        </div>
+      </div>
+      <div className="mt-6">
+        <link_1.default href="/" className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          Voltar para Home
+        </link_1.default>
       </div>
     </div>);
 };

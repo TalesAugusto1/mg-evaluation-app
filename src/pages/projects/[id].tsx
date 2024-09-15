@@ -1,15 +1,13 @@
-"use client";
-
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Project } from '@/types/project';
 import { Task } from '@/types/task';
-import { useAuth } from '@/context/authContext';
+// import { useAuth } from '@/context/authContext';
 import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai'; 
 import Link from 'next/link';
 
 const ProjectDetails = () => {
-  const { userId } = useAuth();
+  // const { userId } = useAuth();
   const router = useRouter();
   const { id } = router.query;
   const [project, setProject] = useState<Project | null>(null);
@@ -17,15 +15,15 @@ const ProjectDetails = () => {
   const [newTask, setNewTask] = useState<{ name: string; description: string; status: string; dueDate: string; assignedUserId: string }>({
     name: '', 
     description: '', 
-    status: 'todo', 
+    status: 'todo',
     dueDate: '', 
-    assignedUserId: '' 
+    assignedUserId: ''
   });
   const [editingTask, setEditingTask] = useState<{ id: string; name: string; description: string; status: string; dueDate: string; assignedUserId: string } | null>(null);
   const [editingProject, setEditingProject] = useState<{ name: string; description: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [users, setUsers] = useState<{ id: string; name: string }[]>([]); // List of users
+  const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
     if (id) {
@@ -36,20 +34,20 @@ const ProjectDetails = () => {
       fetch(`http://localhost:3001/api/projects/${id}`)
         .then(response => response.json())
         .then(data => setProject(data))
-        .catch(err => setError('Failed to fetch project details' + err))
+        .catch(err => setError('Failed to fetch project details: ' + err))
         .finally(() => setLoading(false));
 
       // Fetch tasks for the project
       fetch(`http://localhost:3001/api/projects/${id}/tasks`)
         .then(response => response.json())
         .then(data => setTasks(data))
-        .catch(err => setError('Failed to fetch tasks' + err));
+        .catch(err => setError('Failed to fetch tasks: ' + err));
 
       // Fetch users for task assignment
       fetch('http://localhost:3001/api/users')
         .then(response => response.json())
         .then(data => setUsers(data))
-        .catch(err => setError('Failed to fetch users' + err));
+        .catch(err => setError('Failed to fetch users: ' + err));
     }
   }, [id]);
 
@@ -64,14 +62,14 @@ const ProjectDetails = () => {
           body: JSON.stringify({
             ...newTask,
             projectId: id,
-            userId: userId, 
+            assignedUserId: newTask.assignedUserId,
           }),
         });
-
+  
         if (response.ok) {
           const addedTask = await response.json();
           setTasks([...tasks, addedTask]);
-          setNewTask({ name: '', description: '', status: 'todo', dueDate: '', assignedUserId: '' }); 
+          setNewTask({ name: '', description: '', status: 'todo', dueDate: '', assignedUserId: '' });
         } else {
           console.error('Failed to add task');
         }
@@ -99,13 +97,14 @@ const ProjectDetails = () => {
             assignedUserId: editingTask.assignedUserId,
           }),
         });
-
+  
         if (response.ok) {
           const updatedTask = await response.json();
           setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
           setEditingTask(null); 
         } else {
-          console.error('Failed to edit task');
+          const errorData = await response.json();
+          console.error('Failed to edit task:', errorData.error);
         }
       } catch (error) {
         console.error('Error editing task:', error);
@@ -114,6 +113,7 @@ const ProjectDetails = () => {
       console.error('No task selected for editing');
     }
   };
+  
 
   const handleEditProject = async () => {
     if (editingProject) {
@@ -148,7 +148,7 @@ const ProjectDetails = () => {
       description: task.description, 
       status: task.status,
       dueDate: task.dueDate,
-      assignedUserId: task.assignedUserId 
+      assignedUserId: task.assignedUserId
     });
   };
 
@@ -303,7 +303,7 @@ const ProjectDetails = () => {
                     <td className="px-4 py-2 border">{task.dueDate}</td>
                     <td className="px-4 py-2 border">{task.status}</td>
                     <td className="px-4 py-2 border">
-                      {users.find(user => user.id === task.assignedUserId)?.name || 'Unassigned'}
+                        {users.find(user => user.id === task.assignedUserId)?.name || 'Unassigned'}
                     </td>
                     <td className="px-4 py-2 border flex items-center">
                       <button
