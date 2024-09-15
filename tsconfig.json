@@ -15,8 +15,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "outDir": "./dist",            // Diretório de saída dos arquivos compilados
-    "rootDir": "./",               // Diretório raiz dos arquivos de origem
+    "outDir": "./dist", // Diretório de saída dos arquivos compilados
+    "rootDir": "./", // Diretório raiz dos arquivos de origem
     "plugins": [
       {
         "name": "next"

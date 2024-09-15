@@ -22,7 +22,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [profilePicture, setProfilePicture] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    // Verificar e recuperar os dados do localStorage ao iniciar
     const storedToken = localStorage.getItem('token');
     const storedName = localStorage.getItem('name');
     const storedUserId = localStorage.getItem('userId');
@@ -38,7 +37,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const login = (token: string, name: string, userId: string, profilePicture?: string) => {
-    console.log('Login called with:', { token, name, userId, profilePicture });
     setIsAuthenticated(true);
     setToken(token);
     setName(name);
@@ -53,7 +51,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
-    console.log('Logging out...');
     setIsAuthenticated(false);
     setToken(undefined);
     setName(undefined);

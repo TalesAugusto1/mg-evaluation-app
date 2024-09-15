@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/authContext';
 import Link from 'next/link';
@@ -8,12 +8,12 @@ import Link from 'next/link';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     try {
       const response = await fetch('http://localhost:3001/api/login', {
         method: 'POST',
@@ -22,11 +22,18 @@ const Login = () => {
         },
         body: JSON.stringify({ email, password }),
       });
-  
+
       if (response.ok) {
         const { token, name, userId, profilePicture } = await response.json();
         console.log('Login successful:', { token, name, userId, profilePicture });
-        login(token, name, userId, profilePicture);         router.push('/');
+        
+        // Aguarde a atualização do estado de login antes de redirecionar
+        login(token, name, userId, profilePicture);
+
+        // Use um setTimeout para garantir que o estado seja completamente atualizado antes de redirecionar
+        setTimeout(() => {
+          router.push('/');
+        }, 100);
       } else {
         console.error('Login failed');
       }
@@ -34,8 +41,13 @@ const Login = () => {
       console.error('Error during login:', error);
     }
   };
-  
-  
+
+  // Monitora se o usuário está autenticado e redireciona para a home
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/');
+    }
+  }, [isAuthenticated]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white">

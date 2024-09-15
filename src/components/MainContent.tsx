@@ -10,7 +10,7 @@ interface MainContentProps {
   projects: Project[];
 }
 
-const MainContent: React.FC<MainContentProps> = ({ children, projects }) => {
+const MainContent: React.FC<MainContentProps> = ({ projects }) => {
   const { name, profilePicture, logout } = useAuth();
 
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
