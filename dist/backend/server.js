@@ -318,20 +318,29 @@ app.delete("/api/projects/:id", function (req, res) { return __awaiter(void 0, v
                 id = req.params.id;
                 _a.label = 1;
             case 1:
-                _a.trys.push([1, 3, , 4]);
+                _a.trys.push([1, 4, , 5]);
+                // Primeiro, exclua todas as tarefas associadas ao projeto
+                return [4 /*yield*/, prisma.task.deleteMany({
+                        where: { projectId: id },
+                    })];
+            case 2:
+                // Primeiro, exclua todas as tarefas associadas ao projeto
+                _a.sent();
+                // Depois, exclua o projeto
                 return [4 /*yield*/, prisma.project.delete({
                         where: { id: id },
                     })];
-            case 2:
+            case 3:
+                // Depois, exclua o projeto
                 _a.sent();
                 res.status(204).send();
-                return [3 /*break*/, 4];
-            case 3:
+                return [3 /*break*/, 5];
+            case 4:
                 error_7 = _a.sent();
                 console.error("Erro ao deletar projeto:", error_7);
                 res.status(500).send("Erro interno do servidor");
-                return [3 /*break*/, 4];
-            case 4: return [2 /*return*/];
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
         }
     });
 }); });
@@ -490,7 +499,7 @@ app.get("/api/users/:id", function (req, res) { return __awaiter(void 0, void 0,
                 _a.trys.push([1, 6, , 7]);
                 return [4 /*yield*/, prisma.user.findUnique({
                         where: { id: id },
-                        include: { tasks: true }, // Inclui tarefas para estatísticas
+                        include: { tasks: true },
                     })];
             case 2:
                 user = _a.sent();
@@ -510,6 +519,31 @@ app.get("/api/users/:id", function (req, res) { return __awaiter(void 0, void 0,
                 res.status(500).send("Erro interno do servidor");
                 return [3 /*break*/, 7];
             case 7: return [2 /*return*/];
+        }
+    });
+}); });
+app.delete("/api/users/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, error_14;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = req.params.id;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, prisma.user.delete({
+                        where: { id: id },
+                    })];
+            case 2:
+                _a.sent();
+                res.status(204).send();
+                return [3 /*break*/, 4];
+            case 3:
+                error_14 = _a.sent();
+                console.error("Erro ao deletar usuário:", error_14);
+                res.status(500).json({ error: "Erro ao deletar usuário" });
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); });

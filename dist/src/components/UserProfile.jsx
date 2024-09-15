@@ -41,11 +41,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = require("react");
 var image_1 = __importDefault(require("next/image"));
+var router_1 = require("next/router");
 var link_1 = __importDefault(require("next/link"));
 var UserProfile = function (_a) {
     var userId = _a.userId;
     var _b = (0, react_1.useState)(null), user = _b[0], setUser = _b[1];
     var _c = (0, react_1.useState)(true), loading = _c[0], setLoading = _c[1];
+    var _d = (0, react_1.useState)(false), editMode = _d[0], setEditMode = _d[1];
+    var _e = (0, react_1.useState)(''), name = _e[0], setName = _e[1];
+    var _f = (0, react_1.useState)(null), profilePicture = _f[0], setProfilePicture = _f[1];
+    var _g = (0, react_1.useState)(''), password = _g[0], setPassword = _g[1];
+    var router = (0, router_1.useRouter)();
     (0, react_1.useEffect)(function () {
         var fetchUser = function () { return __awaiter(void 0, void 0, void 0, function () {
             var response, data, error_1;
@@ -53,7 +59,6 @@ var UserProfile = function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, 4, 5]);
-                        console.log('Fetching user with ID:', userId);
                         return [4 /*yield*/, fetch("http://localhost:3001/api/users/".concat(userId))];
                     case 1:
                         response = _a.sent();
@@ -63,12 +68,12 @@ var UserProfile = function (_a) {
                         return [4 /*yield*/, response.json()];
                     case 2:
                         data = _a.sent();
-                        console.log('Fetched user data:', data);
                         setUser(data);
+                        setName(data.name);
                         return [3 /*break*/, 5];
                     case 3:
                         error_1 = _a.sent();
-                        console.error("Erro ao buscar perfil do usuário:", error_1);
+                        console.error("Error fetching user data:", error_1);
                         return [3 /*break*/, 5];
                     case 4:
                         setLoading(false);
@@ -79,33 +84,138 @@ var UserProfile = function (_a) {
         }); };
         fetchUser();
     }, [userId]);
+    var handleDeleteAccount = function () { return __awaiter(void 0, void 0, void 0, function () {
+        var confirmed, response, error_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    confirmed = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
+                    if (!confirmed) return [3 /*break*/, 4];
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, fetch("http://localhost:3001/api/users/".concat(userId), {
+                            method: 'DELETE',
+                        })];
+                case 2:
+                    response = _a.sent();
+                    if (response.ok) {
+                        alert("Account deleted successfully.");
+                        router.push('/');
+                    }
+                    else {
+                        alert("Failed to delete account. Please try again.");
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_2 = _a.sent();
+                    console.error("Error deleting account:", error_2);
+                    alert("Error deleting account. Please try again.");
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    }); };
+    var handleUpdateProfile = function (e) { return __awaiter(void 0, void 0, void 0, function () {
+        var formData, response, updatedUser, error_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    e.preventDefault();
+                    formData = new FormData();
+                    formData.append('name', name);
+                    if (profilePicture) {
+                        formData.append('profilePicture', profilePicture);
+                    }
+                    if (password) {
+                        formData.append('password', password);
+                    }
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 6, , 7]);
+                    return [4 /*yield*/, fetch("http://localhost:3001/api/users/".concat(userId), {
+                            method: 'PUT',
+                            body: formData,
+                        })];
+                case 2:
+                    response = _a.sent();
+                    if (!response.ok) return [3 /*break*/, 4];
+                    alert("Profile updated successfully.");
+                    setEditMode(false);
+                    return [4 /*yield*/, response.json()];
+                case 3:
+                    updatedUser = _a.sent();
+                    setUser(updatedUser);
+                    return [3 /*break*/, 5];
+                case 4:
+                    alert("Failed to update profile. Please try again.");
+                    _a.label = 5;
+                case 5: return [3 /*break*/, 7];
+                case 6:
+                    error_3 = _a.sent();
+                    console.error("Error updating profile:", error_3);
+                    alert("Error updating profile. Please try again.");
+                    return [3 /*break*/, 7];
+                case 7: return [2 /*return*/];
+            }
+        });
+    }); };
     if (loading)
-        return <p className="text-center text-lg text-gray-400">Loading...</p>;
+        return <p className="text-center text-lg text-gray-400 dark:text-gray-600">Loading...</p>;
     if (!user)
-        return <p className="text-center text-lg text-gray-400">Usuário não encontrado</p>;
+        return <p className="text-center text-lg text-gray-400 dark:text-gray-600">User not found</p>;
     var profilePictureSrc = user.profilePicture
         ? "data:".concat(user.profilePicture.type, ";base64,").concat(Buffer.from(user.profilePicture.data).toString('base64'))
         : '';
-    return (<div className="min-h-screen flex flex-col items-center p-6 bg-gray-900 text-white">
-      <div className="max-w-3xl w-full bg-gray-800 shadow-md rounded-lg p-6">
-        <div className="flex flex-col items-center mb-6"> 
-          {user.profilePicture ? (<div className="relative w-24 h-24">
-              <image_1.default src={profilePictureSrc} alt={"".concat(user.name, "'s profile")} width={96} height={96} layout="fixed" className="rounded-full border-4 border-blue-600 object-cover"/>
-            </div>) : (<div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-gray-400">
-              No Image
-            </div>)}
-          <h1 className="text-4xl font-bold text-gray-100 mt-12">{user.name}</h1>
-        </div>
-        <div className="bg-gray-700 p-4 rounded-lg shadow-inner">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-300">Estatísticas de Tarefas</h2>
-          <p className="text-lg mb-2"><strong>Todo:</strong> {user.taskStatistics.todo}</p>
-          <p className="text-lg mb-2"><strong>Em Andamento:</strong> {user.taskStatistics.inProgress}</p>
-          <p className="text-lg"><strong>Concluídas:</strong> {user.taskStatistics.done}</p>
+    return (<div className="min-h-screen flex flex-col items-center p-6 bg-gray-100 dark:bg-gray-900">
+      <div className="max-w-4xl w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
+        <div className="flex flex-row items-start mb-8 space-x-8">
+          <div className="flex-shrink-0">
+            <div className="relative w-32 h-32">
+              {user.profilePicture ? (<image_1.default src={profilePictureSrc} alt={"".concat(user.name, "'s profile")} width={128} height={128} layout="fixed" className="rounded-full border-4 border-blue-500 dark:border-blue-300 object-cover" aria-labelledby="profile-picture"/>) : (<div className="w-32 h-32 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center text-gray-700 dark:text-gray-300 text-2xl font-bold">
+                  No Image
+                </div>)}
+            </div>
+          </div>
+          <div className="flex flex-col justify-center flex-grow space-y-4">
+            <h1 id="profile-name" className="text-3xl font-semibold text-gray-800 dark:text-gray-100">{user.name}</h1>
+            <p className="text-lg text-gray-600 dark:text-gray-300">{user.id}</p>
+          </div>
+          <div className="flex flex-col space-y-4">
+            {editMode ? (<form onSubmit={handleUpdateProfile} className="space-y-6">
+                <div>
+                  <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Name:</label>
+                  <input id="name" type="text" value={name} onChange={function (e) { return setName(e.target.value); }} className="w-full p-3 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg" required aria-required="true"/>
+                </div>
+                <div>
+                  <label htmlFor="profile-picture" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture:</label>
+                  <input id="profile-picture" type="file" onChange={function (e) { var _a; return setProfilePicture(((_a = e.target.files) === null || _a === void 0 ? void 0 : _a[0]) || null); }} className="w-full text-sm text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg" aria-describedby="file-upload-help"/>
+                  <p id="file-upload-help" className="text-gray-500 dark:text-gray-400 text-sm">Select a profile picture to upload.</p>
+                </div>
+                <div>
+                  <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">New Password:</label>
+                  <input id="password" type="password" value={password} onChange={function (e) { return setPassword(e.target.value); }} className="w-full p-3 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg" aria-required="true"/>
+                </div>
+                <button type="submit" className="w-full px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white dark:text-gray-200 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition">
+                  Save Changes
+                </button>
+                <button type="button" onClick={function () { return setEditMode(false); }} className="w-full px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white dark:text-gray-200 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-500 transition">
+                  Cancel
+                </button>
+              </form>) : (<div className="flex flex-col items-center space-y-4">
+                <button onClick={function () { return setEditMode(true); }} className="px-4 py-2 bg-green-500 dark:bg-green-600 text-white dark:text-gray-200 rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition">
+                  Edit Profile
+                </button>
+                <button onClick={handleDeleteAccount} className="px-4 py-2 bg-red-500 dark:bg-red-600 text-white dark:text-gray-200 rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition">
+                  Delete Account
+                </button>
+              </div>)}
+          </div>
         </div>
       </div>
-      <div className="mt-6">
-        <link_1.default href="/" className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-          Voltar para Home
+      <div className="mt-8">
+        <link_1.default href="/" className="inline-block px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white dark:text-gray-200 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition">
+          Back to Home
         </link_1.default>
       </div>
     </div>);

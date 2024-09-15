@@ -197,9 +197,16 @@ app.delete("/api/projects/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
+    // Primeiro, exclua todas as tarefas associadas ao projeto
+    await prisma.task.deleteMany({
+      where: { projectId: id },
+    });
+
+    // Depois, exclua o projeto
     await prisma.project.delete({
       where: { id },
     });
+
     res.status(204).send();
   } catch (error) {
     console.error("Erro ao deletar projeto:", error);

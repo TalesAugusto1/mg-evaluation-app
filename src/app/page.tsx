@@ -1,40 +1,33 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/authContext';
 import NavBar from '@/components/NavBar';
 import MainContent from '@/components/MainContent';
 import { Project } from '@/types/project';
-import Link from 'next/link';
-import { FaSpinner } from 'react-icons/fa'; // Ícone para o carregamento
 
 const Home = () => {
-  const { isAuthenticated, userId, name } = useAuth(); // Adicionado name para exibir no NavBar
+  const { isAuthenticated, userId } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState('');
 
   useEffect(() => {
     if (isAuthenticated && userId) {
-      setLoading(true); // Inicia o estado de carregamento
-      setError(null); // Reseta o erro ao tentar carregar novamente
-
       fetch(`http://localhost:3001/api/projects?userId=${userId}`)
         .then(response => response.json())
         .then(data => {
           if (Array.isArray(data)) {
             setProjects(data);
+            setNotification('Projetos carregados com sucesso!');
+            setTimeout(() => setNotification(''), 5000); // Remove a notificação após 5 segundos
           } else {
-            setError('Erro ao carregar os projetos.');
+            console.error('Data fetched is not an array');
             setProjects([]);
           }
         })
-        .catch(() => {
-          setError('Não foi possível carregar os projetos. Tente novamente mais tarde.');
+        .catch(error => {
+          console.error('Failed to fetch projects:', error);
           setProjects([]);
-        })
-        .finally(() => {
-          setLoading(false); // Finaliza o estado de carregamento
         });
     } else {
       setProjects([]);
@@ -42,49 +35,28 @@ const Home = () => {
   }, [isAuthenticated, userId]);
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
-      {isAuthenticated ? (
-        <>
-          <NavBar projects={projects} userId={userId!} userName={name || ''} /> {/* Passa o nome do usuário para a NavBar */}
-          <MainContent projects={projects}>
-            <div className="text-center">
+    <div className="min-h-screen flex">
+      <NavBar projects={projects} userId={userId!} userName={''} />
+      <div className="flex-1 flex flex-col">
+        <MainContent projects={projects}>
+          {notification && (
+            <div className="bg-green-500 text-white p-4 rounded mb-4 transition-opacity duration-150 ease-in-out">
+              {notification}
+            </div>
+          )}
+          {projects.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-4">
               <h1 className="text-4xl font-bold mb-8">Seus Projetos</h1>
               <p className="mb-4">Aqui você pode gerenciar seus projetos e tarefas.</p>
-              {loading ? (
-                <div className="flex justify-center">
-                  <FaSpinner className="animate-spin text-3xl" />
-                </div>
-              ) : error ? (
-                <div className="text-red-500">
-                  <p>{error}</p>
-                </div>
-              ) : (
-                <p>Projetos carregados com sucesso!</p>
-              )}
             </div>
-          </MainContent>
-        </>
-      ) : (
-        <MainContent projects={projects}>
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-8">Bem-vindo ao Nosso Site</h1>
-            <p className="mb-4">Aqui você pode gerenciar seus projetos e tarefas de forma eficiente.</p>
-            <p className="mb-4">Faça login ou cadastre-se para começar a usar todas as funcionalidades.</p>
-            <div className="space-x-4">
-              <Link href="/auth/login">
-                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all duration-300">
-                  Login
-                </button>
-              </Link>
-              <Link href="/auth/sign-up">
-                <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-all duration-300">
-                  Sign Up
-                </button>
-              </Link>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-4">
+              <h1 className="text-4xl font-bold mb-8">Projetos</h1>
+              <p className="mb-4">Aqui você pode visualizar e gerenciar seus projetos.</p>
             </div>
-          </div>
+          )}
         </MainContent>
-      )}
+      </div>
     </div>
   );
 };
