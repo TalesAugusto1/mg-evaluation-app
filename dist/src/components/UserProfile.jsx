@@ -169,39 +169,41 @@ var UserProfile = function (_a) {
         : '';
     return (<div className="min-h-screen flex flex-col items-center p-6 bg-gray-100 dark:bg-gray-900">
       <div className="max-w-4xl w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
-        <div className="flex flex-row items-start mb-8 space-x-8">
+        <div className="flex items-center mb-8 space-x-8">
           <div className="flex-shrink-0">
             <div className="relative w-32 h-32">
-              {user.profilePicture ? (<image_1.default src={profilePictureSrc} alt={"".concat(user.name, "'s profile")} width={128} height={128} layout="fixed" className="rounded-full border-4 border-blue-500 dark:border-blue-300 object-cover" aria-labelledby="profile-picture"/>) : (<div className="w-32 h-32 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center text-gray-700 dark:text-gray-300 text-2xl font-bold">
+              {user.profilePicture ? (<image_1.default src={profilePictureSrc} alt={"".concat(user.name, "'s profile")} width={128} height={128} layout="fixed" className="rounded-full border-4 border-blue-500 dark:border-blue-300 object-cover"/>) : (<div className="w-32 h-32 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center text-gray-700 dark:text-gray-300 text-2xl font-bold">
                   No Image
                 </div>)}
             </div>
           </div>
           <div className="flex flex-col justify-center flex-grow space-y-4">
-            <h1 id="profile-name" className="text-3xl font-semibold text-gray-800 dark:text-gray-100">{user.name}</h1>
+            <h1 className="text-3xl font-semibold text-gray-800 dark:text-gray-100">{user.name}</h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">{user.id}</p>
           </div>
           <div className="flex flex-col space-y-4">
             {editMode ? (<form onSubmit={handleUpdateProfile} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Name:</label>
-                  <input id="name" type="text" value={name} onChange={function (e) { return setName(e.target.value); }} className="w-full p-3 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg" required aria-required="true"/>
+                  <input id="name" type="text" value={name} onChange={function (e) { return setName(e.target.value); }} className="w-full p-3 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg" required/>
                 </div>
                 <div>
                   <label htmlFor="profile-picture" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Profile Picture:</label>
-                  <input id="profile-picture" type="file" onChange={function (e) { var _a; return setProfilePicture(((_a = e.target.files) === null || _a === void 0 ? void 0 : _a[0]) || null); }} className="w-full text-sm text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg" aria-describedby="file-upload-help"/>
-                  <p id="file-upload-help" className="text-gray-500 dark:text-gray-400 text-sm">Select a profile picture to upload.</p>
+                  <input id="profile-picture" type="file" onChange={function (e) { var _a; return setProfilePicture(((_a = e.target.files) === null || _a === void 0 ? void 0 : _a[0]) || null); }} className="w-full text-sm text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-lg"/>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">Select a profile picture to upload.</p>
                 </div>
                 <div>
                   <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">New Password:</label>
-                  <input id="password" type="password" value={password} onChange={function (e) { return setPassword(e.target.value); }} className="w-full p-3 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg" aria-required="true"/>
+                  <input id="password" type="password" value={password} onChange={function (e) { return setPassword(e.target.value); }} className="w-full p-3 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg"/>
                 </div>
-                <button type="submit" className="w-full px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white dark:text-gray-200 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition">
-                  Save Changes
-                </button>
-                <button type="button" onClick={function () { return setEditMode(false); }} className="w-full px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white dark:text-gray-200 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-500 transition">
-                  Cancel
-                </button>
+                <div className="flex space-x-4">
+                  <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white dark:text-gray-200 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 transition">
+                    Save Changes
+                  </button>
+                  <button type="button" onClick={function () { return setEditMode(false); }} className="flex-1 px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white dark:text-gray-200 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-500 transition">
+                    Cancel
+                  </button>
+                </div>
               </form>) : (<div className="flex flex-col items-center space-y-4">
                 <button onClick={function () { return setEditMode(true); }} className="px-4 py-2 bg-green-500 dark:bg-green-600 text-white dark:text-gray-200 rounded-lg hover:bg-green-600 dark:hover:bg-green-500 transition">
                   Edit Profile

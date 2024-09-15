@@ -6,9 +6,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var react_1 = __importDefault(require("react"));
 var link_1 = __importDefault(require("next/link"));
-var fa_1 = require("react-icons/fa"); // Importa ícones da biblioteca React Icons
+var fa_1 = require("react-icons/fa");
+var authContext_1 = require("@/context/authContext");
 var NavBar = function (_a) {
-    var projects = _a.projects, userId = _a.userId;
+    var projects = _a.projects;
+    var _b = (0, authContext_1.useAuth)(), isAuthenticated = _b.isAuthenticated, userId = _b.userId;
+    if (!isAuthenticated) {
+        return null;
+    }
     return (<nav className="w-64 bg-gray-800 text-white p-4 flex flex-col h-screen">
       {/* Seção de Projetos */}
       <div className="flex flex-col flex-grow">

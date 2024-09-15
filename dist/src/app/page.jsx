@@ -31,6 +31,7 @@ var react_1 = __importStar(require("react"));
 var authContext_1 = require("@/context/authContext");
 var NavBar_1 = __importDefault(require("@/components/NavBar"));
 var MainContent_1 = __importDefault(require("@/components/MainContent"));
+var link_1 = __importDefault(require("next/link"));
 var Home = function () {
     var _a = (0, authContext_1.useAuth)(), isAuthenticated = _a.isAuthenticated, userId = _a.userId;
     var _b = (0, react_1.useState)([]), projects = _b[0], setProjects = _b[1];
@@ -43,7 +44,7 @@ var Home = function () {
                 if (Array.isArray(data)) {
                     setProjects(data);
                     setNotification('Projetos carregados com sucesso!');
-                    setTimeout(function () { return setNotification(''); }, 5000); // Remove a notificação após 5 segundos
+                    setTimeout(function () { return setNotification(''); }, 5000);
                 }
                 else {
                     console.error('Data fetched is not an array');
@@ -60,21 +61,34 @@ var Home = function () {
         }
     }, [isAuthenticated, userId]);
     return (<div className="min-h-screen flex">
-      <NavBar_1.default projects={projects} userId={userId} userName={''}/>
-      <div className="flex-1 flex flex-col">
-        <MainContent_1.default projects={projects}>
-          {notification && (<div className="bg-green-500 text-white p-4 rounded mb-4 transition-opacity duration-150 ease-in-out">
-              {notification}
-            </div>)}
-          {projects.length === 0 ? (<div className="flex-1 flex flex-col items-center justify-center p-4">
-              <h1 className="text-4xl font-bold mb-8">Seus Projetos</h1>
-              <p className="mb-4">Aqui você pode gerenciar seus projetos e tarefas.</p>
-            </div>) : (<div className="flex-1 flex flex-col items-center justify-center p-4">
-              <h1 className="text-4xl font-bold mb-8">Projetos</h1>
-              <p className="mb-4">Aqui você pode visualizar e gerenciar seus projetos.</p>
-            </div>)}
-        </MainContent_1.default>
-      </div>
+      {isAuthenticated && userId ? (<>
+          <NavBar_1.default projects={projects}/>
+          <div className="flex-1 flex flex-col">
+            <MainContent_1.default projects={projects}>
+              {notification && (<div className="bg-green-500 text-white p-4 rounded mb-4 transition-opacity duration-150 ease-in-out">
+                  {notification}
+                </div>)}
+              {projects.length === 0 ? (<div className="flex-1 flex flex-col items-center justify-center p-4">
+                  <h1 className="text-4xl font-bold mb-8">Seus Projetos</h1>
+                  <p className="mb-4">Aqui você pode gerenciar seus projetos e tarefas.</p>
+                </div>) : (<div className="flex-1 flex flex-col items-center justify-center p-4">
+                  <h1 className="text-4xl font-bold mb-8">Projetos</h1>
+                  <p className="mb-4">Aqui você pode visualizar e gerenciar seus projetos.</p>
+                </div>)}
+            </MainContent_1.default>
+          </div>
+        </>) : (<div className="flex-1 flex flex-col items-center justify-center p-4">
+          <h1 className="text-4xl font-bold mb-8">Bem-vindo!</h1>
+          <p className="mb-4">Faça login ou crie uma conta para acessar seus projetos.</p>
+          <div className="flex space-x-4">
+            <link_1.default href="/auth/login">
+              <p className="bg-blue-500 text-white p-3 rounded hover:bg-blue-600">Login</p>
+            </link_1.default>
+            <link_1.default href="/auth/sign-up">
+              <p className="bg-green-500 text-white p-3 rounded hover:bg-green-600">Sign Up</p>
+            </link_1.default>
+          </div>
+        </div>)}
     </div>);
 };
 exports.default = Home;

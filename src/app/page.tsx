@@ -69,7 +69,7 @@ const Home = () => {
             <Link href="/auth/login">
               <p className="bg-blue-500 text-white p-3 rounded hover:bg-blue-600">Login</p>
             </Link>
-            <Link href="/auth/signup">
+            <Link href="/auth/sign-up">
               <p className="bg-green-500 text-white p-3 rounded hover:bg-green-600">Sign Up</p>
             </Link>
           </div>

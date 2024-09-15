@@ -30,24 +30,22 @@ var react_1 = __importStar(require("react"));
 var authContext_1 = require("@/context/authContext");
 var link_1 = __importDefault(require("next/link"));
 var image_1 = __importDefault(require("next/image"));
-var ai_1 = require("react-icons/ai"); // Ícone de logout
+var ai_1 = require("react-icons/ai");
 var MainContent = function (_a) {
     var children = _a.children, projects = _a.projects;
     var _b = (0, authContext_1.useAuth)(), name = _b.name, profilePicture = _b.profilePicture, logout = _b.logout;
     var _c = (0, react_1.useState)(false), showSuccessMessage = _c[0], setShowSuccessMessage = _c[1];
-    var _d = (0, react_1.useState)(false), fadeOut = _d[0], setFadeOut = _d[1]; // Controle de fade out
+    var _d = (0, react_1.useState)(false), fadeOut = _d[0], setFadeOut = _d[1];
     (0, react_1.useEffect)(function () {
         if (projects.length > 0) {
-            // Exibe a mensagem de sucesso por 5 segundos
             setShowSuccessMessage(true);
-            setFadeOut(false); // Inicia sem fade out
+            setFadeOut(false);
             var timer_1 = setTimeout(function () {
-                setFadeOut(true); // Inicia o fade out após 3,5 segundos
+                setFadeOut(true);
             }, 3000);
             var hideTimer_1 = setTimeout(function () {
-                setShowSuccessMessage(false); // Remove a mensagem após o fade
-            }, 10000); // 1,5 segundos de fade
-            // Limpar o temporizador ao desmontar
+                setShowSuccessMessage(false);
+            }, 10000);
             return function () {
                 clearTimeout(timer_1);
                 clearTimeout(hideTimer_1);
@@ -55,14 +53,14 @@ var MainContent = function (_a) {
         }
     }, [projects]);
     return (<div className="flex-1 flex flex-col bg-black text-white relative min-h-screen">
-      {/* Cabeçalho */}
+
       <div className="flex justify-between items-center w-full p-4 bg-gray-900">
-        {/* Texto "Bem-vindo" à esquerda */}
+
         <div className="flex-1">
           {name && <div className="text-xl font-semibold">Bem-vindo, {name}!</div>}
         </div>
 
-        {/* Foto e botão de logout à direita */}
+
         <div className="flex items-center space-x-4">
           {profilePicture ? (<div className="w-12 h-12 rounded-full overflow-hidden">
               <image_1.default src={profilePicture} alt="Foto de perfil" width={48} height={48} layout="fixed"/>
@@ -74,12 +72,10 @@ var MainContent = function (_a) {
         </div>
       </div>
 
-      {/* Mensagem de sucesso de carregamento com fade out */}
       {showSuccessMessage && (<div className={"fixed top-0 left-0 right-0 bg-green-500 text-white text-center py-2 z-50 transition-opacity duration-1500 ease-in-out ".concat(fadeOut ? 'opacity-0' : 'opacity-100')}>
           Projetos carregados com sucesso!
         </div>)}
 
-      {/* Conteúdo principal */}
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         {projects.length === 0 ? (<div className="text-center">
             <h1 className="text-4xl font-bold mb-4">Seus Projetos</h1>

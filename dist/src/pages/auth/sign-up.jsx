@@ -88,7 +88,6 @@ var SignUp = function () {
             switch (_a.label) {
                 case 0:
                     e.preventDefault();
-                    // Validation
                     if (!name || !email || !password || !profilePicture) {
                         console.error('Todos os campos são obrigatórios');
                         return [2 /*return*/];
