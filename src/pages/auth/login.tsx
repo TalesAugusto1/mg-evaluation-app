@@ -25,12 +25,9 @@ const Login = () => {
 
       if (response.ok) {
         const { token, name, userId, profilePicture } = await response.json();
-        console.log('Login successful:', { token, name, userId, profilePicture });
-        
-        // Aguarde a atualização do estado de login antes de redirecionar
+
         login(token, name, userId, profilePicture);
 
-        // Use um setTimeout para garantir que o estado seja completamente atualizado antes de redirecionar
         setTimeout(() => {
           router.push('/');
         }, 100);
@@ -47,7 +44,7 @@ const Login = () => {
     if (isAuthenticated) {
       router.push('/');
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white">
