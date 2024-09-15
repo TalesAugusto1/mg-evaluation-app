@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Project } from '@/types/project';
 import Link from 'next/link';
 import { AiOutlinePlus } from 'react-icons/ai'; // Importa o ícone de +
+import { AiOutlineClose } from 'react-icons/ai'; // Importa o ícone de fechar
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -54,6 +55,7 @@ const Projects = () => {
       setName('');
       setDescription('');
       setFeedbackMessage('Projeto criado com sucesso!');
+      setFormVisible(false); // Ocultar o formulário após a criação
     } else {
       setFeedbackMessage('Erro ao criar projeto.');
     }
@@ -135,47 +137,61 @@ const Projects = () => {
 
         {/* Formulário de Criação */}
         {formVisible && (
-          <form onSubmit={handleCreate} className="bg-gray-800 p-6 rounded shadow-md w-full max-w-md mb-6 mx-auto">
-            <h2 className="text-2xl font-semibold mb-4">Criar Novo Projeto</h2>
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <form onSubmit={handleCreate} className="bg-gray-800 p-6 rounded shadow-md w-full max-w-md mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold">Criar Novo Projeto</h2>
+                <button
+                  type="button"
+                  onClick={() => setFormVisible(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                  aria-label="Fechar formulário de criação"
+                >
+                  <AiOutlineClose className="w-6 h-6" />
+                </button>
+              </div>
 
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Nome do Projeto"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
-              />
-            </div>
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Nome do Projeto"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
+                />
+              </div>
 
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Descrição do Projeto"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
-              />
-            </div>
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Descrição do Projeto"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
+                />
+              </div>
 
-            <button
-              type="submit"
-              className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Criar Projeto
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Criar Projeto
+              </button>
+            </form>
+          </div>
         )}
       </div>
 
       {/* Botão de Toggle para Formulário */}
-      <button
-        onClick={() => setFormVisible(!formVisible)}
-        className={`fixed ${projects.length === 0 ? 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2' : 'bottom-4 right-4'} p-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all`}
-        aria-label={formVisible ? "Fechar formulário de criação" : "Mostrar formulário de criação"}
-      >
-        <AiOutlinePlus className="w-8 h-8" />
-      </button>
+      {!formVisible && (
+        <button
+          onClick={() => setFormVisible(true)}
+          className={`fixed ${projects.length === 0 ? 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2' : 'bottom-4 right-4'} p-4 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all`}
+          aria-label="Mostrar formulário de criação"
+        >
+          <AiOutlinePlus className="w-8 h-8" />
+        </button>
+      )}
     </div>
   );
 };

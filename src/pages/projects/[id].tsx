@@ -2,12 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Project } from '@/types/project';
 import { Task } from '@/types/task';
-// import { useAuth } from '@/context/authContext';
-import { AiOutlineDelete, AiOutlineEdit } from 'react-icons/ai'; 
+import { AiOutlineDelete, AiOutlineEdit, AiOutlinePlus, AiOutlineClose } from 'react-icons/ai'; 
 import Link from 'next/link';
 
 const ProjectDetails = () => {
-  // const { userId } = useAuth();
   const router = useRouter();
   const { id } = router.query;
   const [project, setProject] = useState<Project | null>(null);
@@ -24,6 +22,8 @@ const ProjectDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
+  const [showNewTaskForm, setShowNewTaskForm] = useState(false);
+  const [showEditTaskForm, setShowEditTaskForm] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -51,6 +51,8 @@ const ProjectDetails = () => {
     }
   }, [id]);
 
+  const [isKanbanView, setIsKanbanView] = useState(false);
+
   const handleAddTask = async () => {
     if (id && newTask.name && newTask.description && newTask.status && newTask.dueDate) {
       try {
@@ -70,6 +72,7 @@ const ProjectDetails = () => {
           const addedTask = await response.json();
           setTasks([...tasks, addedTask]);
           setNewTask({ name: '', description: '', status: 'todo', dueDate: '', assignedUserId: '' });
+          setShowNewTaskForm(false); // Hide the form after adding the task
         } else {
           console.error('Failed to add task');
         }
@@ -102,6 +105,7 @@ const ProjectDetails = () => {
           const updatedTask = await response.json();
           setTasks(tasks.map(task => (task.id === updatedTask.id ? updatedTask : task)));
           setEditingTask(null); 
+          setShowEditTaskForm(false); // Hide the form after editing the task
         } else {
           const errorData = await response.json();
           console.error('Failed to edit task:', errorData.error);
@@ -150,6 +154,7 @@ const ProjectDetails = () => {
       dueDate: task.dueDate,
       assignedUserId: task.assignedUserId
     });
+    setShowEditTaskForm(true);
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -169,40 +174,41 @@ const ProjectDetails = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="text-center text-white">Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="text-center text-red-500">Error: {error}</div>;
   }
 
   if (!project) {
-    return <div>No project found</div>;
+    return <div className="text-center text-white">No project found</div>;
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white relative">
+    <div className="min-h-screen flex flex-col items-center bg-gray-900 text-white">
       <Link href="/" passHref>
-        <button className="absolute top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+        <button className="fixed top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
           Voltar para Home
         </button>
       </Link>
-      <div className="w-full max-w-4xl p-4">
-        <div className="relative bg-gray-800 bg-opacity-50 p-4 rounded-lg mt-6">
-          <h1 className="text-3xl font-bold mb-4">{editingProject ? (
-            <input
-              type="text"
-              value={editingProject.name}
-              onChange={(e) => setEditingProject({ ...editingProject, name: e.target.value })}
-              className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white"
-            />
-          ) : (
-            project.name
-          )}
+      <div className="w-full max-w-4xl p-6 mt-6">
+        <div className="relative bg-gray-800 bg-opacity-75 p-6 rounded-lg">
+          <h1 className="text-3xl font-bold mb-4">
+            {editingProject ? (
+              <input
+                type="text"
+                value={editingProject.name}
+                onChange={(e) => setEditingProject({ ...editingProject, name: e.target.value })}
+                className="w-full px-4 py-2 border rounded focus:outline-none bg-gray-700 text-white"
+              />
+            ) : (
+              project.name
+            )}
           </h1>
           <button
             onClick={() => setEditingProject(editingProject ? null : { name: project.name, description: project.description })}
-            className="absolute top-0 right-0 mt-2 mr-2 p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+            className="absolute top-4 right-4 p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
           >
             <AiOutlineEdit size={24} />
           </button>
@@ -228,125 +234,185 @@ const ProjectDetails = () => {
           )}
         </div>
 
+        <div className="relative mt-8">
+          <div><h2 className="text-2xl font-bold mb-4">Tasks </h2><button
+  onClick={() => setIsKanbanView(!isKanbanView)}
+  className="mb-4 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+>
+  {isKanbanView ? 'Switch to Table View' : 'Switch to Kanban View'}
+</button>
+</div>
 
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Tasks</h2>
-
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Task name"
-              value={newTask.name}
-              onChange={(e) => setNewTask({ ...newTask, name: e.target.value })}
-              className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
-            />
-            <textarea
-              placeholder="Task description"
-              value={newTask.description}
-              onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-              className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
-            />
-            <input
-              type="date"
-              placeholder="Due date"
-              value={newTask.dueDate}
-              onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
-              className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
-            />
-            <select
-              value={newTask.status}
-              onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
-              className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
-            >
-              <option value="todo">Todo</option>
-              <option value="in-progress">In Progress</option>
-              <option value="review">Review</option>
-              <option value="done">Done</option>
-            </select>
-            <select
-              value={newTask.assignedUserId}
-              onChange={(e) => setNewTask({ ...newTask, assignedUserId: e.target.value })}
-              className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
-            >
-              <option value="">Assign to...</option>
-              {users.map(user => (
-                <option key={user.id} value={user.id}>{user.name}</option>
-              ))}
-            </select>
+          {!showNewTaskForm && (
             <button
-              onClick={handleAddTask}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={() => setShowNewTaskForm(!showNewTaskForm)}
+              className="fixed bottom-8 right-8 p-4 bg-green-500 text-white rounded-full shadow-lg hover:bg-green-600 transition-transform"
             >
-              Add Task
+              <AiOutlinePlus size={24} />
             </button>
-          </div>
+          )}
 
-          <div className="overflow-x-auto">
-            <table className="w-full bg-gray-800 text-white">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 border">Name</th>
-                  <th className="px-4 py-2 border">Description</th>
-                  <th className="px-4 py-2 border">Due Date</th>
-                  <th className="px-4 py-2 border">Status</th>
-                  <th className="px-4 py-2 border">Assigned User</th>
-                  <th className="px-4 py-2 border">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tasks.map((task) => (
-                  <tr key={task.id}>
-                    <td className="px-4 py-2 border">{task.name}</td>
-                    <td className="px-4 py-2 border">{task.description}</td>
-                    <td className="px-4 py-2 border">{task.dueDate}</td>
-                    <td className="px-4 py-2 border">{task.status}</td>
-                    <td className="px-4 py-2 border">
-                        {users.find(user => user.id === task.assignedUserId)?.name || 'Unassigned'}
-                    </td>
-                    <td className="px-4 py-2 border flex items-center">
-                      <button
-                        onClick={() => handleTaskEditClick(task)}
-                        className="text-yellow-500 hover:text-yellow-600"
-                      >
-                        <AiOutlineEdit size={20} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTask(task.id)}
-                        className="text-red-500 hover:text-red-600 ml-4"
-                      >
-                        <AiOutlineDelete size={20} />
-                      </button>
-                    </td>
-                  </tr>
+
+
+          {showNewTaskForm && (
+            <div className="absolute top-0 left-0 right-0 p-6 bg-gray-800 rounded-lg shadow-lg z-10">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold">Add New Task</h3>
+                <button
+                  onClick={() => setShowNewTaskForm(false)}
+                  className="text-gray-400 hover:text-gray-300"
+                >
+                  <AiOutlineClose size={24} />
+                </button>
+              </div>
+              <input
+                type="text"
+                placeholder="Task name"
+                value={newTask.name}
+                onChange={(e) => setNewTask({ ...newTask, name: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+              />
+              <textarea
+                placeholder="Task description"
+                value={newTask.description}
+                onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+              />
+              <input
+                type="date"
+                placeholder="Due date"
+                value={newTask.dueDate}
+                onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+              />
+              <select
+                value={newTask.status}
+                onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+              >
+                <option value="todo">Todo</option>
+                <option value="in-progress">In Progress</option>
+                <option value="review">Review</option>
+                <option value="done">Done</option>
+              </select>
+              <select
+                value={newTask.assignedUserId}
+                onChange={(e) => setNewTask({ ...newTask, assignedUserId: e.target.value })}
+                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+              >
+                <option value="">Assign to...</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>{user.name}</option>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </select>
+              <button
+                onClick={handleAddTask}
+                className="apx-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Add Task
+              </button>
+            </div>
+          )}
 
-          {editingTask && (
-            <div className="mt-4 p-4 bg-gray-800 rounded">
-              <h3 className="text-xl font-bold mb-2">Edit Task</h3>
+{isKanbanView ? (
+  <div className="flex flex-wrap gap-4">
+    {['todo', 'in-progress', 'review', 'done'].map(status => (
+      <div key={status} className="flex-1 min-w-[280px] bg-gray-800 p-4 rounded-lg">
+        <h3 className="text-xl font-semibold mb-4 capitalize">{status}</h3>
+        {tasks.filter(task => task.status === status).map(task => (
+          <div key={task.id} className="bg-gray-700 p-4 mb-4 rounded-lg">
+            <h4 className="text-lg font-semibold">{task.name}</h4>
+            <p>{task.description}</p>
+            <p className="text-gray-400">Due: {task.dueDate}</p>
+            <p className="text-gray-400">Assigned: {users.find(user => user.id === task.assignedUserId)?.name || 'Unassigned'}</p>
+            <div className="flex space-x-2 mt-2">
+              <button
+                onClick={() => handleTaskEditClick(task)}
+                className="text-yellow-500 hover:text-yellow-600"
+              >
+                <AiOutlineEdit size={20} />
+              </button>
+              <button
+                onClick={() => handleDeleteTask(task.id)}
+                className="text-red-500 hover:text-red-600"
+              >
+                <AiOutlineDelete size={20} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+) : (
+  <div className="overflow-x-auto bg-gray-800 rounded-lg mt-6">
+    <table className="w-full bg-gray-800 text-white">
+      <thead>
+        <tr>
+          <th className="px-4 py-2 border">Name</th>
+          <th className="px-4 py-2 border">Description</th>
+          <th className="px-4 py-2 border">Due Date</th>
+          <th className="px-4 py-2 border">Status</th>
+          <th className="px-4 py-2 border">Assigned User</th>
+          <th className="px-4 py-2 border">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {tasks.map((task) => (
+          <tr key={task.id}>
+            <td className="px-4 py-2 border">{task.name}</td>
+            <td className="px-4 py-2 border">{task.description}</td>
+            <td className="px-4 py-2 border">{task.dueDate}</td>
+            <td className="px-4 py-2 border">{task.status}</td>
+            <td className="px-4 py-2 border">
+              {users.find(user => user.id === task.assignedUserId)?.name || 'Unassigned'}
+            </td>
+            <td className="px-4 py-2 border flex space-x-4">
+              <button
+                onClick={() => handleTaskEditClick(task)}
+                className="text-yellow-500 hover:text-yellow-600"
+              >
+                <AiOutlineEdit size={20} />
+              </button>
+              <button
+                onClick={() => handleDeleteTask(task.id)}
+                className="text-red-500 hover:text-red-600"
+              >
+                <AiOutlineDelete size={20} />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
+
+          {showEditTaskForm && editingTask && (
+            <div className="absolute top-0 left-0 right-0 mt-8 p-6 bg-gray-800 rounded-lg z-10">
+              <h3 className="text-xl font-semibold mb-4">Edit Task</h3>
               <input
                 type="text"
                 value={editingTask.name}
                 onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
-                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+                className="w-full px-4 py-2 border rounded mb-4 bg-gray-700 text-white"
               />
               <textarea
                 value={editingTask.description}
                 onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
-                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+                className="w-full px-4 py-2 border rounded mb-4 bg-gray-700 text-white"
               />
               <input
                 type="date"
                 value={editingTask.dueDate}
                 onChange={(e) => setEditingTask({ ...editingTask, dueDate: e.target.value })}
-                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+                className="w-full px-4 py-2 border rounded mb-4 bg-gray-700 text-white"
               />
               <select
                 value={editingTask.status}
                 onChange={(e) => setEditingTask({ ...editingTask, status: e.target.value })}
-                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+                className="w-full px-4 py-2 border rounded mb-4 bg-gray-700 text-white"
               >
                 <option value="todo">Todo</option>
                 <option value="in-progress">In Progress</option>
@@ -356,7 +422,7 @@ const ProjectDetails = () => {
               <select
                 value={editingTask.assignedUserId}
                 onChange={(e) => setEditingTask({ ...editingTask, assignedUserId: e.target.value })}
-                className="w-full px-4 py-2 border rounded mb-2 bg-gray-700 text-white"
+                className="w-full px-4 py-2 border rounded mb-4 bg-gray-700 text-white"
               >
                 <option value="">Assign to...</option>
                 {users.map(user => (
@@ -375,6 +441,7 @@ const ProjectDetails = () => {
       </div>
     </div>
   );
+  
 };
 
 export default ProjectDetails;
