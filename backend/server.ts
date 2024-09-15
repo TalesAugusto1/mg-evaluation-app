@@ -304,7 +304,7 @@ app.get("/api/users/:id", async (req: Request, res: Response) => {
     // Obter o usuário
     const user = await prisma.user.findUnique({
       where: { id },
-      include: { tasks: true }, // Inclui tarefas para estatísticas
+      include: { tasks: true },
     });
 
     if (user) {
@@ -323,6 +323,21 @@ app.get("/api/users/:id", async (req: Request, res: Response) => {
     res.status(500).send("Erro interno do servidor");
   }
 });
+
+app.delete("/api/users/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    await prisma.user.delete({
+      where: { id },
+    });
+    res.status(204).send();
+  } catch (error) {
+    console.error("Erro ao deletar usuário:", error);
+    res.status(500).json({ error: "Erro ao deletar usuário" });
+  }
+});
+
 app.listen(3001, () => {
   console.log("Servidor rodando na porta 3001");
 });

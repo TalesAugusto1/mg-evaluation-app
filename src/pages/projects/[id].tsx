@@ -228,11 +228,10 @@ const ProjectDetails = () => {
           )}
         </div>
 
-        {/* Tasks section */}
+
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Tasks</h2>
 
-          {/* Input fields for new task */}
           <div className="mb-4">
             <input
               type="text"
@@ -282,7 +281,6 @@ const ProjectDetails = () => {
             </button>
           </div>
 
-          {/* Tasks table */}
           <div className="overflow-x-auto">
             <table className="w-full bg-gray-800 text-white">
               <thead>
@@ -325,7 +323,6 @@ const ProjectDetails = () => {
             </table>
           </div>
 
-          {/* Editing Task Form */}
           {editingTask && (
             <div className="mt-4 p-4 bg-gray-800 rounded">
               <h3 className="text-xl font-bold mb-2">Edit Task</h3>
