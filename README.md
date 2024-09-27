@@ -1,4 +1,5 @@
-echo "# Projeto de Gerenciamento de Projetos e Tarefas
+
+# Projeto de Gerenciamento de Projetos e Tarefas
 
 Este é um projeto de gerenciamento de projetos e tarefas utilizando [Next.js](https://nextjs.org), com autenticação, gerenciamento de projetos e tarefas, e integração com backend. O projeto também inclui funcionalidades para o upload de imagens e melhorias visuais.
 
